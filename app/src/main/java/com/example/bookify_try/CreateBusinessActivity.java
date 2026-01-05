@@ -1,7 +1,6 @@
 package com.example.bookify_try;
 
 import android.app.TimePickerDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,7 +10,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -37,14 +35,13 @@ public class CreateBusinessActivity extends AppCompatActivity {
 
     private TextInputEditText businessNameEditText;
     private LinearLayout resourcesContainer, workingHoursContainer;
-    private Button saveBusinessButton;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
-    private List<Resource> resourceList = new ArrayList<>();
-    private Map<String, WorkingHours> workingHoursMap = new LinkedHashMap<>();
-    private Map<String, TextView> dayHoursTextViews = new LinkedHashMap<>();
+    private final List<Resource> resourceList = new ArrayList<>();
+    private final List<WorkingHours> workingHoursList = new ArrayList<>();
+    private final Map<String, TextView> dayHoursTextViews = new LinkedHashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,9 +55,8 @@ public class CreateBusinessActivity extends AppCompatActivity {
         findViewById(R.id.addResourceButton).setOnClickListener(v -> showAddResourceDialog());
         resourcesContainer = findViewById(R.id.resourcesContainer);
         workingHoursContainer = findViewById(R.id.workingHoursContainer);
-        saveBusinessButton = findViewById(R.id.saveBusinessButton);
+        findViewById(R.id.saveBusinessButton).setOnClickListener(v -> saveBusiness());
 
-        saveBusinessButton.setOnClickListener(v -> saveBusiness());
         setupWorkingHoursViews();
     }
 
@@ -69,103 +65,77 @@ public class CreateBusinessActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
 
         for (String day : days) {
-            workingHoursMap.put(day, new WorkingHours(day));
+            WorkingHours wh = new WorkingHours(day);
+            workingHoursList.add(wh);
+
             View dayView = inflater.inflate(R.layout.day_working_hours_item, workingHoursContainer, false);
             TextView dayNameTextView = dayView.findViewById(R.id.dayNameTextView);
             TextView hoursTextView = dayView.findViewById(R.id.hoursTextView);
-            Button editHoursButton = dayView.findViewById(R.id.editHoursButton);
-
             dayNameTextView.setText("יום " + day);
             hoursTextView.setText("לא הוגדר");
             dayHoursTextViews.put(day, hoursTextView);
 
-            editHoursButton.setOnClickListener(v -> showEditHoursDialog(day));
+            dayView.findViewById(R.id.editHoursButton).setOnClickListener(v -> showEditHoursDialog(wh));
             workingHoursContainer.addView(dayView);
         }
     }
 
-    private void showEditHoursDialog(final String day) {
-        WorkingHours currentDayHours = workingHoursMap.get(day);
-        // Create a deep copy to modify in the dialog
+    private void showEditHoursDialog(final WorkingHours workingHours) {
         final List<TimeSlot> dialogTimeSlots = new ArrayList<>();
-        if (currentDayHours != null) {
-            for(TimeSlot ts : currentDayHours.getTimeSlots()){
-                dialogTimeSlots.add(new TimeSlot(ts.getStartHour(), ts.getStartMinute(), ts.getEndHour(), ts.getEndMinute()));
-            }
-        }
+        workingHours.getTimeSlots().forEach(ts -> dialogTimeSlots.add(new TimeSlot(ts.getStartHour(), ts.getStartMinute(), ts.getEndHour(), ts.getEndMinute())));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_edit_working_hours, null);
-        TextView dialogTitle = dialogView.findViewById(R.id.dialogTitle);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_working_hours, null);
+        ((TextView) dialogView.findViewById(R.id.dialogTitle)).setText("עריכת שעות עבור יום " + workingHours.getDayOfWeek());
         LinearLayout timeSlotsContainer = dialogView.findViewById(R.id.timeSlotsContainer);
-        Button addTimeSlotButton = dialogView.findViewById(R.id.addTimeSlotButton);
 
-        dialogTitle.setText("עריכת שעות עבור יום " + day);
-
-        // Populate dialog with existing time slots
         for (TimeSlot ts : dialogTimeSlots) {
-            addTimeSlotViewToDialog(inflater, timeSlotsContainer, dialogTimeSlots, ts);
+            addTimeSlotViewToDialog(getLayoutInflater(), timeSlotsContainer, dialogTimeSlots, ts);
         }
 
-        addTimeSlotButton.setOnClickListener(v -> {
-            // Show Time Picker for start time
+        dialogView.findViewById(R.id.addTimeSlotButton).setOnClickListener(v -> {
             TimePickerDialog startTimePicker = new TimePickerDialog(this, (view, startHour, startMinute) -> {
-                // Show Time Picker for end time
                 TimePickerDialog endTimePicker = new TimePickerDialog(this, (view2, endHour, endMinute) -> {
-                    if(endHour < startHour || (endHour == startHour && endMinute <= startMinute)){
+                    if (endHour < startHour || (endHour == startHour && endMinute <= startMinute)) {
                         Toast.makeText(this, "שעת הסיום חייבת להיות אחרי שעת ההתחלה", Toast.LENGTH_LONG).show();
                         return;
                     }
                     TimeSlot newTimeSlot = new TimeSlot(startHour, startMinute, endHour, endMinute);
                     dialogTimeSlots.add(newTimeSlot);
-                    addTimeSlotViewToDialog(inflater, timeSlotsContainer, dialogTimeSlots, newTimeSlot);
-
-                }, 0, 0, true);
-                endTimePicker.setTitle("בחר שעת סיום");
+                    addTimeSlotViewToDialog(getLayoutInflater(), timeSlotsContainer, dialogTimeSlots, newTimeSlot);
+                }, 9, 0, true);
                 endTimePicker.show();
-            }, 0, 0, true);
-            startTimePicker.setTitle("בחר שעת התחלה");
+            }, 9, 0, true);
             startTimePicker.show();
         });
 
         builder.setView(dialogView)
                 .setPositiveButton("שמור", (dialog, id) -> {
-                    WorkingHours dayHours = workingHoursMap.get(day);
-                    if (dayHours != null) {
-                        dayHours.setTimeSlots(dialogTimeSlots);
-                        updateDayHoursTextView(day);
-                    }
+                    workingHours.setTimeSlots(dialogTimeSlots);
+                    updateDayHoursTextView(workingHours);
                 })
-                .setNegativeButton("ביטול", (dialog, id) -> dialog.cancel());
-
+                .setNegativeButton("ביטול", null);
         builder.create().show();
     }
 
     private void addTimeSlotViewToDialog(LayoutInflater inflater, LinearLayout container, List<TimeSlot> list, TimeSlot timeSlot) {
         View timeSlotView = inflater.inflate(R.layout.time_slot_item, container, false);
-        TextView timeSlotTextView = timeSlotView.findViewById(R.id.timeSlotTextView);
-        ImageButton removeButton = timeSlotView.findViewById(R.id.removeTimeSlotButton);
-
-        timeSlotTextView.setText(timeSlot.toString());
-        removeButton.setOnClickListener(v -> {
+        ((TextView) timeSlotView.findViewById(R.id.timeSlotTextView)).setText(timeSlot.toString());
+        timeSlotView.findViewById(R.id.removeTimeSlotButton).setOnClickListener(v -> {
             list.remove(timeSlot);
             container.removeView(timeSlotView);
         });
         container.addView(timeSlotView);
     }
 
-    private void updateDayHoursTextView(String day) {
-        WorkingHours dayHours = workingHoursMap.get(day);
-        TextView hoursTextView = dayHoursTextViews.get(day);
-        if (dayHours != null && hoursTextView != null) {
-            if (dayHours.getTimeSlots().isEmpty()) {
+    private void updateDayHoursTextView(WorkingHours workingHours) {
+        TextView hoursTextView = dayHoursTextViews.get(workingHours.getDayOfWeek());
+        if (hoursTextView != null) {
+            if (workingHours.getTimeSlots().isEmpty()) {
                 hoursTextView.setText("לא הוגדר");
             } else {
-                 Collections.sort(dayHours.getTimeSlots(), Comparator.comparingInt(TimeSlot::getStartHour));
-                 String slotsText = dayHours.getTimeSlots().stream()
-                         .map(TimeSlot::toString)
-                         .collect(Collectors.joining(", "));
+                Collections.sort(workingHours.getTimeSlots(), Comparator.comparingInt(TimeSlot::getStartHour));
+                String slotsText = workingHours.getTimeSlots().stream().map(TimeSlot::toString).collect(Collectors.joining(", "));
                 hoursTextView.setText(slotsText);
             }
         }
@@ -173,8 +143,6 @@ public class CreateBusinessActivity extends AppCompatActivity {
 
     private void saveBusiness() {
         String businessName = businessNameEditText.getText().toString().trim();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-
         if (TextUtils.isEmpty(businessName)) {
             businessNameEditText.setError("יש למלא את שם העסק.");
             return;
@@ -183,27 +151,30 @@ public class CreateBusinessActivity extends AppCompatActivity {
             Toast.makeText(this, "יש להוסיף לפחות משאב אחד.", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(this, "שגיאה: לא נמצא משתמש מחובר.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         String ownerId = currentUser.getUid();
-        Business business = new Business(ownerId, businessName, resourceList, workingHoursMap);
+        Business business = new Business(ownerId, businessName, resourceList, workingHoursList);
 
         db.collection("businesses").document(ownerId)
                 .set(business)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(CreateBusinessActivity.this, "העסק נוצר בהצלחה!", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Business successfully written!"); // Log on success
+                    Toast.makeText(CreateBusinessActivity.this, "העסק נוצר בהצלחה!", Toast.LENGTH_LONG).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(CreateBusinessActivity.this, "שגיאה ביצירת העסק.", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error writing document", e);
+                    Toast.makeText(CreateBusinessActivity.this, "שגיאה ביצירת העסק: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
-    
+
     private void showAddResourceDialog() {
-        // Unchanged from before
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_resource, null);
         final TextInputEditText resourceNameEditText = dialogView.findViewById(R.id.resourceNameEditText);
@@ -217,8 +188,14 @@ public class CreateBusinessActivity extends AppCompatActivity {
                     String quantityStr = resourceQuantityEditText.getText().toString().trim();
 
                     if (!name.isEmpty() && !capacityStr.isEmpty() && !quantityStr.isEmpty()) {
-                        Resource resource = new Resource(name, Integer.parseInt(capacityStr), Integer.parseInt(quantityStr));
-                        addResourceToList(resource);
+                        try {
+                           int capacity = Integer.parseInt(capacityStr);
+                           int quantity = Integer.parseInt(quantityStr);
+                           Resource resource = new Resource(name, capacity, quantity);
+                           addResourceToList(resource);
+                        } catch (NumberFormatException e) {
+                            Toast.makeText(this, "קיבולת וכמות חייבים להיות מספרים.", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         Toast.makeText(this, "יש למלא את כל השדות.", Toast.LENGTH_SHORT).show();
                     }
@@ -230,8 +207,7 @@ public class CreateBusinessActivity extends AppCompatActivity {
     private void addResourceToList(Resource resource) {
         resourceList.add(resource);
         View resourceItemView = getLayoutInflater().inflate(R.layout.resource_item_view, resourcesContainer, false);
-        TextView resourceDetailsTextView = resourceItemView.findViewById(R.id.resourceDetailsTextView);
-        resourceDetailsTextView.setText(String.format(Locale.getDefault(), "%s (קיבולת: %d, כמות: %d)", resource.getName(), resource.getCapacity(), resource.getQuantity()));
+        ((TextView) resourceItemView.findViewById(R.id.resourceDetailsTextView)).setText(String.format(Locale.getDefault(), "%s (קיבולת: %d, כמות: %d)", resource.getName(), resource.getCapacity(), resource.getQuantity()));
         resourceItemView.findViewById(R.id.removeResourceButton).setOnClickListener(v -> {
             resourceList.remove(resource);
             resourcesContainer.removeView(resourceItemView);

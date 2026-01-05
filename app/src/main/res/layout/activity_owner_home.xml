@@ -28,14 +28,14 @@
         app:layout_constraintTop_toBottomOf="@id/welcomeTextView"
         tools:visibility="visible">
 
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/viewBookingsButton"
             style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="צפה בהזמנות" />
 
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/editBusinessButton"
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
@@ -46,7 +46,7 @@
     </LinearLayout>
 
     <!-- Button for when no business exists -->
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/createBusinessButton"
         style="@style/Widget.Material3.Button.TonalButton"
         android:layout_width="wrap_content"
@@ -60,11 +60,12 @@
         app:layout_constraintTop_toBottomOf="@id/welcomeTextView" 
         tools:visibility="gone" />
 
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/logOutButton"
         style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         android:text="התנתק"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

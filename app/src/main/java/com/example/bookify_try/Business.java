@@ -1,19 +1,18 @@
 package com.example.bookify_try;
 
 import java.util.List;
-import java.util.Map;
 
 public class Business {
     private String ownerId;
     private String businessName;
     private List<Resource> resources;
-    private Map<String, WorkingHours> workingHours;
+    private List<WorkingHours> workingHours; // Changed from Map to List
 
     // Required empty constructor for Firestore
     public Business() {
     }
 
-    public Business(String ownerId, String businessName, List<Resource> resources, Map<String, WorkingHours> workingHours) {
+    public Business(String ownerId, String businessName, List<Resource> resources, List<WorkingHours> workingHours) {
         this.ownerId = ownerId;
         this.businessName = businessName;
         this.resources = resources;
@@ -45,11 +44,11 @@ public class Business {
         this.resources = resources;
     }
 
-    public Map<String, WorkingHours> getWorkingHours() {
+    public List<WorkingHours> getWorkingHours() {
         return workingHours;
     }
 
-    public void setWorkingHours(Map<String, WorkingHours> workingHours) {
+    public void setWorkingHours(List<WorkingHours> workingHours) {
         this.workingHours = workingHours;
     }
 }

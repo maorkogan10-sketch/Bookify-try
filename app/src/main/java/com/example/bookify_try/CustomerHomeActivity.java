@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,7 +17,26 @@ public class CustomerHomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_home);
 
+        Button searchBusinessButton = findViewById(R.id.searchBusinessButton);
+        Button myBookingsButton = findViewById(R.id.myBookingsButton);
         Button logOutButton = findViewById(R.id.logOutButton);
+
+        searchBusinessButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CustomerHomeActivity.this, SearchBusinessActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        myBookingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: Navigate to MyBookingsActivity
+                Toast.makeText(CustomerHomeActivity.this, "My Bookings clicked", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

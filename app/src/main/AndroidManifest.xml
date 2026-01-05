@@ -43,6 +43,18 @@
             android:name=".CreateBusinessActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".SearchBusinessActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".BusinessDetailsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CreateBookingActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
