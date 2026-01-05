@@ -60,6 +60,7 @@ public class CreateBusinessActivity extends AppCompatActivity {
         setupWorkingHoursViews();
     }
 
+    //check
     private void setupWorkingHoursViews() {
         String[] days = {"ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"};
         LayoutInflater inflater = LayoutInflater.from(this);
