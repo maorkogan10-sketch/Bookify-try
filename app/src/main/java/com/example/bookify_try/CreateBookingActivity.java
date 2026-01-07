@@ -3,6 +3,7 @@ package com.example.bookify_try;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -24,6 +25,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class CreateBookingActivity extends AppCompatActivity {
+
+    private static final String TAG = "CreateBookingActivity";
 
     public static final String EXTRA_BUSINESS_ID = "EXTRA_BUSINESS_ID";
     public static final String EXTRA_YEAR = "EXTRA_YEAR";
@@ -85,7 +88,6 @@ public class CreateBookingActivity extends AppCompatActivity {
                             List<String> resourceNames = business.getResources().stream()
                                     .map(Resource::getName)
                                     .collect(Collectors.toList());
-
                             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, resourceNames);
                             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             resourceSpinner.setAdapter(adapter);
@@ -96,13 +98,13 @@ public class CreateBookingActivity extends AppCompatActivity {
 
     private void showTimePicker(boolean isStartTime) {
         TimePickerDialog timePicker = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
+            Calendar selectedTime = Calendar.getInstance();
+            selectedTime.set(year, month, day, hourOfDay, minute, 0);
             if (isStartTime) {
-                startTime = Calendar.getInstance();
-                startTime.set(year, month, day, hourOfDay, minute, 0);
+                startTime = selectedTime;
                 startTimeButton.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
             } else {
-                endTime = Calendar.getInstance();
-                endTime.set(year, month, day, hourOfDay, minute, 0);
+                endTime = selectedTime;
                 endTimeButton.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
             }
         }, 9, 0, true);
@@ -114,75 +116,88 @@ public class CreateBookingActivity extends AppCompatActivity {
 
         Timestamp startTimestamp = new Timestamp(startTime.getTime());
         Timestamp endTimestamp = new Timestamp(endTime.getTime());
-        String selectedResource = (String) resourceSpinner.getSelectedItem();
+        String selectedResourceName = (String) resourceSpinner.getSelectedItem();
 
-        // 1. Check if booking is within working hours
-        if (!isBookingWithinWorkingHours(startTimestamp)) {
-            Toast.makeText(this, "Booking time is outside of business working hours.", Toast.LENGTH_LONG).show();
+        Resource selectedResource = getSelectedResource(selectedResourceName);
+        if (selectedResource == null) {
+            Toast.makeText(this, "Error: Resource details not found.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 2. Check for conflicting bookings
+        if (!isBookingWithinWorkingHours(startTime, endTime)) {
+            Toast.makeText(this, "ההזמנה מחוץ לשעות הפעילות של העסק", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        checkCollisionsAndSave(startTimestamp, endTimestamp, selectedResourceName, selectedResource.getQuantity());
+    }
+
+    private void checkCollisionsAndSave(Timestamp start, Timestamp end, String resourceName, int resourceQuantity) {
+        Log.d(TAG, "Checking for collisions for resource '" + resourceName + "' with quantity " + resourceQuantity);
         db.collection("bookings")
                 .whereEqualTo("businessId", businessId)
-                .whereEqualTo("resourceName", selectedResource)
-                .whereGreaterThanOrEqualTo("endTime", startTimestamp) // Check for overlaps
+                .whereEqualTo("resourceName", resourceName)
+                .whereLessThan("startTime", end)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        Booking existingBooking = doc.toObject(Booking.class);
-                        if (existingBooking.getStartTime().toDate().before(endTimestamp.toDate())) {
-                             Toast.makeText(this, "The selected time slot is already booked.", Toast.LENGTH_LONG).show();
-                             return; // Conflict found
+                    int conflictingBookingsCount = 0;
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Booking existing = document.toObject(Booking.class);
+                        if (existing.getEndTime().compareTo(start) > 0) {
+                            conflictingBookingsCount++;
                         }
                     }
 
-                    // No conflicts, proceed to save
-                    saveBooking(startTimestamp, endTimestamp, selectedResource);
+                    Log.d(TAG, "Found " + conflictingBookingsCount + " conflicting bookings.");
+
+                    if (conflictingBookingsCount >= resourceQuantity) {
+                        Toast.makeText(this, "המשאב תפוס לחלוטין בשעות אלו", Toast.LENGTH_LONG).show();
+                    } else {
+                        saveBooking(start, end, resourceName);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "<<<<< BOOKING CHECK FAILED >>>>>", e);
+                    Toast.makeText(this, "Booking check failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
-    
-    private boolean isInputValid(){
-        if (mAuth.getCurrentUser() == null) {
-            Toast.makeText(this, "You must be logged in to book.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (startTime == null || endTime == null) {
-            Toast.makeText(this, "Please select start and end times.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (!endTime.after(startTime)) {
-            Toast.makeText(this, "End time must be after start time.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (resourceSpinner.getSelectedItem() == null) {
-            Toast.makeText(this, "Please select a resource.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
+
+    private void saveBooking(Timestamp start, Timestamp end, String resource) {
+        String customerId = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
+        String bookingId = db.collection("bookings").document().getId();
+        Booking booking = new Booking(bookingId, businessId, customerId, resource, start, end);
+
+        db.collection("bookings").document(bookingId).set(booking)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "ההזמנה בוצעה בהצלחה!", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(this, SearchBusinessActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                     Log.e(TAG, "<<<<< BOOKING SAVE FAILED >>>>>", e);
+                    Toast.makeText(this, "Booking failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
     }
 
-    private boolean isBookingWithinWorkingHours(Timestamp bookingStartTime) {
+    private boolean isBookingWithinWorkingHours(Calendar bookingStart, Calendar bookingEnd) {
         if (business == null || business.getWorkingHours() == null) return false;
 
-        Calendar bookingCal = Calendar.getInstance();
-        bookingCal.setTime(bookingStartTime.toDate());
-        int dayOfWeek = bookingCal.get(Calendar.DAY_OF_WEEK); // Sunday = 1, Saturday = 7
+        int dayOfWeek = bookingStart.get(Calendar.DAY_OF_WEEK);
         String dayName = getDayName(dayOfWeek);
 
         for (WorkingHours wh : business.getWorkingHours()) {
-            if (Objects.equals(wh.getDayOfWeek(), dayName)) {
+            if (dayName.equals(wh.getDayOfWeek())) {
                 for (TimeSlot ts : wh.getTimeSlots()) {
-                    Calendar slotStart = (Calendar) startTime.clone();
-                    slotStart.set(Calendar.HOUR_OF_DAY, ts.getStartHour());
-                    slotStart.set(Calendar.MINUTE, ts.getStartMinute());
+                    Calendar slotStart = Calendar.getInstance();
+                    slotStart.set(year, month, day, ts.getStartHour(), ts.getStartMinute());
 
-                    Calendar slotEnd = (Calendar) endTime.clone();
-                    slotEnd.set(Calendar.HOUR_OF_DAY, ts.getEndHour());
-                    slotEnd.set(Calendar.MINUTE, ts.getEndMinute());
+                    Calendar slotEnd = Calendar.getInstance();
+                    slotEnd.set(year, month, day, ts.getEndHour(), ts.getEndMinute());
 
-                    if (!startTime.before(slotStart) && !endTime.after(slotEnd)) {
-                        return true; // Booking is within this time slot
+                    if (!bookingStart.before(slotStart) && !bookingEnd.after(slotEnd)) {
+                        return true; 
                     }
                 }
             }
@@ -190,22 +205,35 @@ public class CreateBookingActivity extends AppCompatActivity {
         return false;
     }
     
-    private void saveBooking(Timestamp startTimestamp, Timestamp endTimestamp, String resourceName) {
-        String customerId = mAuth.getCurrentUser().getUid();
-        String bookingId = db.collection("bookings").document().getId();
-        Booking booking = new Booking(bookingId, businessId, customerId, resourceName, startTimestamp, endTimestamp);
+    private Resource getSelectedResource(String resourceName) {
+        if (business != null && business.getResources() != null) {
+            for (Resource res : business.getResources()) {
+                if (res.getName().equals(resourceName)) {
+                    return res;
+                }
+            }
+        }
+        return null;
+    }
 
-        db.collection("bookings").document(bookingId).set(booking)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Booking successful!", Toast.LENGTH_LONG).show();
-                    Intent homeIntent = new Intent(CreateBookingActivity.this, CustomerHomeActivity.class);
-                    homeIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(homeIntent);
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Booking failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+    private boolean isInputValid() {
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "You must be logged in to book.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (startTime == null || endTime == null) {
+            Toast.makeText(this, "יש לבחור שעת התחלה וסיום", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (!endTime.after(startTime)) {
+            Toast.makeText(this, "שעת הסיום חייבת להיות אחרי שעת ההתחלה", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (resourceSpinner.getSelectedItem() == null) {
+            Toast.makeText(this, "יש לבחור משאב", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     private String getDayName(int dayOfWeek) {

@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -81,7 +82,7 @@ public class CreateBusinessActivity extends AppCompatActivity {
         }
     }
 
-    private void showEditHoursDialog(final WorkingHours workingHours) {
+    private void showEditHoursDialog(@NonNull final WorkingHours workingHours) {
         final List<TimeSlot> dialogTimeSlots = new ArrayList<>();
         workingHours.getTimeSlots().forEach(ts -> dialogTimeSlots.add(new TimeSlot(ts.getStartHour(), ts.getStartMinute(), ts.getEndHour(), ts.getEndMinute())));
 

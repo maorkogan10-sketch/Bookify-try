@@ -54,6 +54,14 @@
         <activity
             android:name=".CreateBookingActivity"
             android:exported="false" />
+        
+        <activity
+            android:name=".ViewBookingsCalendarActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".DailyBookingsActivity"
+            android:exported="false" />
 
     </application>
 

@@ -59,8 +59,8 @@ public class OwnerHomeActivity extends AppCompatActivity {
         viewBookingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Navigate to ViewBookingsActivity
-                Toast.makeText(OwnerHomeActivity.this, "Navigate to View Bookings", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(OwnerHomeActivity.this, ViewBookingsCalendarActivity.class);
+                startActivity(intent);
             }
         });
 
