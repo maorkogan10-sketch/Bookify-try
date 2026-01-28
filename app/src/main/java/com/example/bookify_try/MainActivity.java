@@ -35,13 +35,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // User is signed in, redirect to the correct home screen
             redirectUser(currentUser.getUid());
         } else {
-            // No user is signed in, show the welcome screen with login/signup buttons
             showWelcomeScreen();
         }
     }
@@ -60,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                                 } else {
                                     startActivity(new Intent(MainActivity.this, CustomerHomeActivity.class));
                                 }
-                                finish(); // Close this activity
+                                finish(); // סוגר את המסך ועובר
                             } else {
                                 // Document doesn't exist, something is wrong. Log out and show welcome.
                                 Log.d(TAG, "No such document");

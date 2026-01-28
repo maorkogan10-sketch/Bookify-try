@@ -83,7 +83,7 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
 
-        // --- Create User with Firebase Auth ---
+        // כאן יוצרים AUTH חדש
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -114,7 +114,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         User user = new User(fullName, email, userType);
 
-        // Add a new document with a generated ID
+        // יוצרים כאן DOCUMENT חדש עם האיי די
         db.collection("users").document(uid)
                 .set(user)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -123,11 +123,11 @@ public class SignUpActivity extends AppCompatActivity {
                         Log.d(TAG, "DocumentSnapshot successfully written!");
                         Toast.makeText(SignUpActivity.this, "ההרשמה הושלמה בהצלחה!", Toast.LENGTH_LONG).show();
 
-                        // Navigate to the main activity after successful registration
+                        // סוגר את כל המסכים שהיו פתוחים עד עכשיו ומחזיר למסך הבית
                         Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
-                        finish(); // Close the sign-up activity
+                        finish(); // סוגר לגמרי
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
