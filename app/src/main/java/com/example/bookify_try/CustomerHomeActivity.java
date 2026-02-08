@@ -32,8 +32,8 @@ public class CustomerHomeActivity extends AppCompatActivity {
         myBookingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Navigate to MyBookingsActivity
-                Toast.makeText(CustomerHomeActivity.this, "My Bookings clicked", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(CustomerHomeActivity.this, MyBookingsActivity.class);
+                startActivity(intent);
             }
         });
 

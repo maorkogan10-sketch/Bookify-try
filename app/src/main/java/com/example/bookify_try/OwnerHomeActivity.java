@@ -75,6 +75,9 @@ public class OwnerHomeActivity extends AppCompatActivity {
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // עצירת השירות בעת התנתקות
+                stopService(new Intent(OwnerHomeActivity.this, BookingListenerService.class));
+                
                 mAuth.signOut();
                 Intent intent = new Intent(OwnerHomeActivity.this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -92,15 +95,10 @@ public class OwnerHomeActivity extends AppCompatActivity {
 
     private void checkIfBusinessExists() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            // Should not happen, but as a safeguard
-            Toast.makeText(this, "User not logged in.", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
+        if (currentUser == null) return;
+        
         String userId = currentUser.getUid();
 
-        // The business document ID is the same as the owner's UID.
         db.collection("businesses").document(userId).get()
             .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
@@ -108,24 +106,25 @@ public class OwnerHomeActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            // Business exists
-                            Log.d(TAG, "Business document found.");
                             businessExistsGroup.setVisibility(View.VISIBLE);
                             createBusinessButton.setVisibility(View.GONE);
+                            
+                            // הפעלת השירות להאזנה להזמנות חדשות
+                            startBookingService();
                         } else {
-                            // Business does not exist
-                            Log.d(TAG, "No such document. User needs to create a business.");
                             businessExistsGroup.setVisibility(View.GONE);
                             createBusinessButton.setVisibility(View.VISIBLE);
                         }
-                    } else {
-                        Log.d(TAG, "get failed with ", task.getException());
-                        Toast.makeText(OwnerHomeActivity.this, "Error checking for business.", Toast.LENGTH_SHORT).show();
-                        // Show create button as a fallback
-                        createBusinessButton.setVisibility(View.VISIBLE);
-                        businessExistsGroup.setVisibility(View.GONE);
                     }
                 }
             });
+    }
+
+    /**
+     * הפעלת שירות הרקע שמאזין להזמנות חדשות ב-Firestore
+     */
+    private void startBookingService() {
+        Intent serviceIntent = new Intent(this, BookingListenerService.class);
+        startService(serviceIntent);
     }
 }

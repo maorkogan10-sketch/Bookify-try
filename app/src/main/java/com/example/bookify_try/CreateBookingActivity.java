@@ -1,7 +1,13 @@
 package com.example.bookify_try;
 
+import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -10,7 +16,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,6 +36,7 @@ import java.util.stream.Collectors;
 public class CreateBookingActivity extends AppCompatActivity {
 
     private static final String TAG = "CreateBookingActivity";
+    private static final int NOTIFICATION_PERMISSION_CODE = 123;
 
     public static final String EXTRA_BUSINESS_ID = "EXTRA_BUSINESS_ID";
     public static final String EXTRA_YEAR = "EXTRA_YEAR";
@@ -44,7 +54,6 @@ public class CreateBookingActivity extends AppCompatActivity {
     private int year, month, day;
     private Calendar startTime, endTime;
 
-    // פונקציה שמתבצעת בעת יצירת המסך: מאתחלת את הרכיבים, מקבלת נתונים מהמסך הקודם ומגדירה מאזינים לכפתורים
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,9 +87,34 @@ public class CreateBookingActivity extends AppCompatActivity {
         startTimeButton.setOnClickListener(v -> showTimePicker(true));
         endTimeButton.setOnClickListener(v -> showTimePicker(false));
         confirmBookingButton.setOnClickListener(v -> createBooking());
+
+        // 1. יצירת ערוץ התראות
+        NotificationHelper.createNotificationChannel(this);
+        
+        // 2. בקשת הרשאה מהמשתמש (עבור אנדרואיד 13 ומעלה)
+        checkNotificationPermission();
     }
 
-    // פונקציה שטוענת את נתוני העסק והמשאבים שלו מ-Firestore כדי להציג אותם ב-Spinner לבחירה
+    private void checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_CODE);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "הרשאת התראות אושרה!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "לא תקבל תזכורות ללא אישור התראות.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
     private void loadBusinessData() {
         db.collection("businesses").document(businessId).get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -98,7 +132,6 @@ public class CreateBookingActivity extends AppCompatActivity {
                 });
     }
 
-    // פונקציה שמציגה TimePickerDialog לבחירת שעה (התחלה או סיום) ומעדכנת את המשתנים והטקסט בכפתור
     private void showTimePicker(boolean isStartTime) {
         TimePickerDialog timePicker = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
             Calendar selectedTime = Calendar.getInstance();
@@ -114,7 +147,6 @@ public class CreateBookingActivity extends AppCompatActivity {
         timePicker.show();
     }
 
-    // פונקציה שמתחילה את תהליך יצירת ההזמנה: בודקת תקינות קלט, שעות פעילות והתנגשויות
     private void createBooking() {
         if (!isInputValid()) return;
 
@@ -136,9 +168,7 @@ public class CreateBookingActivity extends AppCompatActivity {
         checkCollisionsAndSave(startTimestamp, endTimestamp, selectedResourceName, selectedResource.getQuantity());
     }
 
-    // פונקציה שבודקת ב-Firestore האם יש התנגשויות (הזמנות קיימות לאותו משאב באותו זמן) ושומרת אם הכל תקין
     private void checkCollisionsAndSave(Timestamp start, Timestamp end, String resourceName, int resourceQuantity) {
-        Log.d(TAG, "Checking for collisions for resource '" + resourceName + "' with quantity " + resourceQuantity);
         db.collection("bookings")
                 .whereEqualTo("businessId", businessId)
                 .whereEqualTo("resourceName", resourceName)
@@ -153,21 +183,15 @@ public class CreateBookingActivity extends AppCompatActivity {
                         }
                     }
 
-                    Log.d(TAG, "Found " + conflictingBookingsCount + " conflicting bookings.");
-
                     if (conflictingBookingsCount >= resourceQuantity) {
                         Toast.makeText(this, "המשאב תפוס לחלוטין בשעות אלו", Toast.LENGTH_LONG).show();
                     } else {
                         saveBooking(start, end, resourceName);
                     }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "<<<<< BOOKING CHECK FAILED >>>>>", e);
-                    Toast.makeText(this, "Booking check failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(this, "Booking check failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
     }
 
-    // פונקציה ששומרת את אובייקט ההזמנה החדש ב-Firestore ומחזירה את המשתמש למסך הבית
     private void saveBooking(Timestamp start, Timestamp end, String resource) {
         String customerId = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
         String bookingId = db.collection("bookings").document().getId();
@@ -176,33 +200,55 @@ public class CreateBookingActivity extends AppCompatActivity {
         db.collection("bookings").document(bookingId).set(booking)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "ההזמנה בוצעה בהצלחה!", Toast.LENGTH_LONG).show();
+                    
+                    // תזמון התזכורת
+                    scheduleReminder(booking);
+                    
                     Intent intent = new Intent(this, SearchBusinessActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finish();
                 })
-                .addOnFailureListener(e -> {
-                     Log.e(TAG, "<<<<< BOOKING SAVE FAILED >>>>>", e);
-                    Toast.makeText(this, "Booking failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(this, "Booking failed: " + e.getMessage(), Toast.LENGTH_LONG).show());
     }
 
-    // פונקציה שבודקת האם טווח השעות המבוקש נמצא בתוך חלונות זמן הפעילות של העסק
+    private void scheduleReminder(Booking booking) {
+        // לצורך הבדיקה שלך: התראה בעוד 10 שניות מהרגע
+        long reminderTimeMillis = System.currentTimeMillis() + 10000;
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, ReminderReceiver.class);
+        intent.putExtra("title", "תזכורת להזמנה");
+        intent.putExtra("message", "יש לך הזמנה ל-" + booking.getResourceName() + " בעוד זמן קצר.");
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this, 
+                booking.getBookingId().hashCode(), 
+                intent, 
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        if (alarmManager != null) {
+            try {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminderTimeMillis, pendingIntent);
+            } catch (SecurityException e) {
+                Log.e(TAG, "Exact alarm permission denied", e);
+                // נפילה חזרה להתראה לא מדויקת אם אין הרשאת שעון מדויק
+                alarmManager.set(AlarmManager.RTC_WAKEUP, reminderTimeMillis, pendingIntent);
+            }
+        }
+    }
+
     private boolean isBookingWithinWorkingHours(Calendar bookingStart, Calendar bookingEnd) {
         if (business == null || business.getWorkingHours() == null) return false;
-
         int dayOfWeek = bookingStart.get(Calendar.DAY_OF_WEEK);
         String dayName = getDayName(dayOfWeek);
-
         for (WorkingHours wh : business.getWorkingHours()) {
             if (dayName.equals(wh.getDayOfWeek())) {
                 for (TimeSlot ts : wh.getTimeSlots()) {
                     Calendar slotStart = Calendar.getInstance();
                     slotStart.set(year, month, day, ts.getStartHour(), ts.getStartMinute());
-
                     Calendar slotEnd = Calendar.getInstance();
                     slotEnd.set(year, month, day, ts.getEndHour(), ts.getEndMinute());
-
                     if (!bookingStart.before(slotStart) && !bookingEnd.after(slotEnd)) {
                         return true; 
                     }
@@ -212,40 +258,23 @@ public class CreateBookingActivity extends AppCompatActivity {
         return false;
     }
     
-    // פונקציית עזר למציאת אובייקט המשאב הנבחר מתוך רשימת המשאבים של העסק
     private Resource getSelectedResource(String resourceName) {
         if (business != null && business.getResources() != null) {
             for (Resource res : business.getResources()) {
-                if (res.getName().equals(resourceName)) {
-                    return res;
-                }
+                if (res.getName().equals(resourceName)) return res;
             }
         }
         return null;
     }
 
-    // פונקציה שבודקת את תקינות הקלט (בחירת שעות, שעת סיום אחרי התחלה וכו') לפני המשך התהליך
     private boolean isInputValid() {
-        if (mAuth.getCurrentUser() == null) {
-            Toast.makeText(this, "You must be logged in to book.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (startTime == null || endTime == null) {
-            Toast.makeText(this, "יש לבחור שעת התחלה וסיום", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (!endTime.after(startTime)) {
-            Toast.makeText(this, "שעת הסיום חייבת להיות אחרי שעת ההתחלה", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (resourceSpinner.getSelectedItem() == null) {
-            Toast.makeText(this, "יש לבחור משאב", Toast.LENGTH_SHORT).show();
-            return false;
-        }
+        if (mAuth.getCurrentUser() == null) return false;
+        if (startTime == null || endTime == null) return false;
+        if (!endTime.after(startTime)) return false;
+        if (resourceSpinner.getSelectedItem() == null) return false;
         return true;
     }
 
-    // פונקציית עזר להמרת מספר היום בשבוע לשמו בעברית
     private String getDayName(int dayOfWeek) {
         switch (dayOfWeek) {
             case Calendar.SUNDAY: return "ראשון";

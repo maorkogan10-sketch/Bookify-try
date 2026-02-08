@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -13,55 +16,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BookifyTry">
+        
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".SignUpActivity"
-            android:exported="false" />
+        <activity android:name=".SignUpActivity" android:exported="false" />
+        <activity android:name=".LogInActivity" android:exported="false" />
+        <activity android:name=".CustomerHomeActivity" android:exported="false" />
+        <activity android:name=".OwnerHomeActivity" android:exported="false" />
+        <activity android:name=".CreateBusinessActivity" android:exported="false" />
+        <activity android:name=".SearchBusinessActivity" android:exported="false" />
+        <activity android:name=".BusinessDetailsActivity" android:exported="false" />
+        <activity android:name=".CreateBookingActivity" android:exported="false" />
+        <activity android:name=".ViewBookingsCalendarActivity" android:exported="false" />
+        <activity android:name=".DailyBookingsActivity" android:exported="false" />
+        <activity android:name=".MyBookingsActivity" android:exported="false" />
 
-        <activity
-            android:name=".LogInActivity"
-            android:exported="false" />
+        <receiver android:name=".ReminderReceiver" android:enabled="true" android:exported="false" />
 
-        <activity
-            android:name=".CustomerHomeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".OwnerHomeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".CreateBusinessActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".SearchBusinessActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".BusinessDetailsActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".CreateBookingActivity"
-            android:exported="false" />
-        
-        <activity
-            android:name=".ViewBookingsCalendarActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".DailyBookingsActivity"
-            android:exported="false" />
+        <!-- רישום השירות לבעל העסק -->
+        <service android:name=".BookingListenerService" android:enabled="true" android:exported="false" />
 
     </application>
 
