@@ -88,10 +88,7 @@ public class CreateBookingActivity extends AppCompatActivity {
         endTimeButton.setOnClickListener(v -> showTimePicker(false));
         confirmBookingButton.setOnClickListener(v -> createBooking());
 
-        // 1. יצירת ערוץ התראות
         NotificationHelper.createNotificationChannel(this);
-        
-        // 2. בקשת הרשאה מהמשתמש (עבור אנדרואיד 13 ומעלה)
         checkNotificationPermission();
     }
 
@@ -150,6 +147,12 @@ public class CreateBookingActivity extends AppCompatActivity {
     private void createBooking() {
         if (!isInputValid()) return;
 
+        // בדיקה ששעת ההתחלה אינה בעבר (אם הזמינו להיום)
+        if (startTime.before(Calendar.getInstance())) {
+            Toast.makeText(this, "לא ניתן להזמין זמן שכבר עבר.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Timestamp startTimestamp = new Timestamp(startTime.getTime());
         Timestamp endTimestamp = new Timestamp(endTime.getTime());
         String selectedResourceName = (String) resourceSpinner.getSelectedItem();
@@ -200,10 +203,7 @@ public class CreateBookingActivity extends AppCompatActivity {
         db.collection("bookings").document(bookingId).set(booking)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "ההזמנה בוצעה בהצלחה!", Toast.LENGTH_LONG).show();
-                    
-                    // תזמון התזכורת
                     scheduleReminder(booking);
-                    
                     Intent intent = new Intent(this, SearchBusinessActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
@@ -213,9 +213,7 @@ public class CreateBookingActivity extends AppCompatActivity {
     }
 
     private void scheduleReminder(Booking booking) {
-        // לצורך הבדיקה שלך: התראה בעוד 10 שניות מהרגע
         long reminderTimeMillis = System.currentTimeMillis() + 10000;
-
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, ReminderReceiver.class);
         intent.putExtra("title", "תזכורת להזמנה");
@@ -231,8 +229,6 @@ public class CreateBookingActivity extends AppCompatActivity {
             try {
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminderTimeMillis, pendingIntent);
             } catch (SecurityException e) {
-                Log.e(TAG, "Exact alarm permission denied", e);
-                // נפילה חזרה להתראה לא מדויקת אם אין הרשאת שעון מדויק
                 alarmManager.set(AlarmManager.RTC_WAKEUP, reminderTimeMillis, pendingIntent);
             }
         }
@@ -245,10 +241,12 @@ public class CreateBookingActivity extends AppCompatActivity {
         for (WorkingHours wh : business.getWorkingHours()) {
             if (dayName.equals(wh.getDayOfWeek())) {
                 for (TimeSlot ts : wh.getTimeSlots()) {
-                    Calendar slotStart = Calendar.getInstance();
-                    slotStart.set(year, month, day, ts.getStartHour(), ts.getStartMinute());
-                    Calendar slotEnd = Calendar.getInstance();
-                    slotEnd.set(year, month, day, ts.getEndHour(), ts.getEndMinute());
+                    Calendar slotStart = (Calendar) bookingStart.clone();
+                    slotStart.set(Calendar.HOUR_OF_DAY, ts.getStartHour());
+                    slotStart.set(Calendar.MINUTE, ts.getStartMinute());
+                    Calendar slotEnd = (Calendar) bookingEnd.clone();
+                    slotEnd.set(Calendar.HOUR_OF_DAY, ts.getEndHour());
+                    slotEnd.set(Calendar.MINUTE, ts.getEndMinute());
                     if (!bookingStart.before(slotStart) && !bookingEnd.after(slotEnd)) {
                         return true; 
                     }
@@ -269,9 +267,18 @@ public class CreateBookingActivity extends AppCompatActivity {
 
     private boolean isInputValid() {
         if (mAuth.getCurrentUser() == null) return false;
-        if (startTime == null || endTime == null) return false;
-        if (!endTime.after(startTime)) return false;
-        if (resourceSpinner.getSelectedItem() == null) return false;
+        if (startTime == null || endTime == null) {
+            Toast.makeText(this, "יש לבחור שעת התחלה וסיום", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (!endTime.after(startTime)) {
+            Toast.makeText(this, "שעת הסיום חייבת להיות אחרי שעת ההתחלה", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (resourceSpinner.getSelectedItem() == null) {
+            Toast.makeText(this, "יש לבחור משאב", Toast.LENGTH_SHORT).show();
+            return false;
+        }
         return true;
     }
 

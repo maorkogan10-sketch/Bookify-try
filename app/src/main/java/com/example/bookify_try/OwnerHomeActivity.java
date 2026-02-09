@@ -67,17 +67,16 @@ public class OwnerHomeActivity extends AppCompatActivity {
          editBusinessButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Navigate to EditBusinessActivity
-                Toast.makeText(OwnerHomeActivity.this, "Navigate to Edit Business", Toast.LENGTH_SHORT).show();
+                // פתיחת אותו מסך (CreateBusinessActivity) במצב עריכה
+                Intent intent = new Intent(OwnerHomeActivity.this, CreateBusinessActivity.class);
+                startActivity(intent);
             }
         });
 
         logOutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // עצירת השירות בעת התנתקות
                 stopService(new Intent(OwnerHomeActivity.this, BookingListenerService.class));
-                
                 mAuth.signOut();
                 Intent intent = new Intent(OwnerHomeActivity.this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -108,8 +107,6 @@ public class OwnerHomeActivity extends AppCompatActivity {
                         if (document.exists()) {
                             businessExistsGroup.setVisibility(View.VISIBLE);
                             createBusinessButton.setVisibility(View.GONE);
-                            
-                            // הפעלת השירות להאזנה להזמנות חדשות
                             startBookingService();
                         } else {
                             businessExistsGroup.setVisibility(View.GONE);
@@ -120,9 +117,6 @@ public class OwnerHomeActivity extends AppCompatActivity {
             });
     }
 
-    /**
-     * הפעלת שירות הרקע שמאזין להזמנות חדשות ב-Firestore
-     */
     private void startBookingService() {
         Intent serviceIntent = new Intent(this, BookingListenerService.class);
         startService(serviceIntent);

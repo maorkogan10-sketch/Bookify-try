@@ -14,6 +14,10 @@ public class ViewBookingsCalendarActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_bookings_calendar);
 
         CalendarView calendarView = findViewById(R.id.calendarView);
+        
+        // הגבלת לוח השנה כך שניתן יהיה לבחור רק מהתאריך הנוכחי והלאה
+        calendarView.setMinDate(System.currentTimeMillis() - 1000);
+
         calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
             Intent intent = new Intent(ViewBookingsCalendarActivity.this, DailyBookingsActivity.class);
             intent.putExtra(DailyBookingsActivity.EXTRA_YEAR, year);

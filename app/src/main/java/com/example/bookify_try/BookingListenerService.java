@@ -20,7 +20,7 @@ public class BookingListenerService extends Service {
 
     @Override
     public void onCreate() {
-        super.onCreate(); // התיקון: הסרת savedInstanceState
+        super.onCreate();
         db = FirebaseFirestore.getInstance();
         Log.d(TAG, "Service Created");
     }
@@ -39,6 +39,7 @@ public class BookingListenerService extends Service {
             return;
         }
 
+        // האזנה בזמן אמת לשינויים בהזמנות של העסק הזה
         listenerRegistration = db.collection("bookings")
                 .whereEqualTo("businessId", ownerId)
                 .addSnapshotListener((value, error) -> {
@@ -48,20 +49,37 @@ public class BookingListenerService extends Service {
                     }
 
                     if (value != null) {
+                        // התעלמות מהריצה הראשונה שטוענת את הנתונים הקיימים
                         if (isFirstRun) {
                             isFirstRun = false;
                             return;
                         }
 
                         for (DocumentChange dc : value.getDocumentChanges()) {
-                            if (dc.getType() == DocumentChange.Type.ADDED) {
-                                Booking booking = dc.getDocument().toObject(Booking.class);
-                                Log.d(TAG, "New booking detected!");
-                                NotificationHelper.showNotification(
-                                        this,
-                                        "הזמנה חדשה!",
-                                        "התקבלה הזמנה חדשה ל-" + booking.getResourceName()
-                                );
+                            Booking booking = dc.getDocument().toObject(Booking.class);
+                            
+                            switch (dc.getType()) {
+                                case ADDED:
+                                    Log.d(TAG, "New booking added: " + booking.getBookingId());
+                                    NotificationHelper.showNotification(
+                                            this,
+                                            "הזמנה חדשה!",
+                                            "התקבלה הזמנה חדשה ל-" + booking.getResourceName()
+                                    );
+                                    break;
+                                    
+                                case REMOVED:
+                                    Log.d(TAG, "Booking canceled: " + booking.getBookingId());
+                                    NotificationHelper.showNotification(
+                                            this,
+                                            "הזמנה בוטלה",
+                                            "הזמנה ל-" + booking.getResourceName() + " בוטלה על ידי הלקוח."
+                                    );
+                                    break;
+                                    
+                                case MODIFIED:
+                                    // אופציונלי: אפשר להוסיף כאן התראה גם על עדכון הזמנה אם תרצה בעתיד
+                                    break;
                             }
                         }
                     }

@@ -3,6 +3,7 @@ package com.example.bookify_try;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,15 @@ import java.util.Locale;
 public class MyBookingsAdapter extends RecyclerView.Adapter<MyBookingsAdapter.ViewHolder> {
 
     private final List<BookingWithBusiness> bookings = new ArrayList<>();
+    private OnDeleteClickListener deleteClickListener;
+
+    public interface OnDeleteClickListener {
+        void onDeleteClick(Booking booking);
+    }
+
+    public void setOnDeleteClickListener(OnDeleteClickListener listener) {
+        this.deleteClickListener = listener;
+    }
 
     @NonNull
     @Override
@@ -37,6 +47,12 @@ public class MyBookingsAdapter extends RecyclerView.Adapter<MyBookingsAdapter.Vi
         String endStr = timeFormat.format(item.getBooking().getEndTime().toDate());
         
         holder.dateTimeTextView.setText("תאריך ושעה: " + startStr + " - " + endStr);
+
+        holder.deleteButton.setOnClickListener(v -> {
+            if (deleteClickListener != null) {
+                deleteClickListener.onDeleteClick(item.getBooking());
+            }
+        });
     }
 
     @Override
@@ -52,12 +68,14 @@ public class MyBookingsAdapter extends RecyclerView.Adapter<MyBookingsAdapter.Vi
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView businessNameTextView, resourceNameTextView, dateTimeTextView;
+        ImageButton deleteButton;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             businessNameTextView = itemView.findViewById(R.id.businessNameTextView);
             resourceNameTextView = itemView.findViewById(R.id.resourceNameTextView);
             dateTimeTextView = itemView.findViewById(R.id.dateTimeTextView);
+            deleteButton = itemView.findViewById(R.id.deleteBookingButton);
         }
     }
 }

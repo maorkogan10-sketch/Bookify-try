@@ -16,9 +16,33 @@
             android:id="@+id/businessNameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="24sp"
+            android:textSize="28sp"
             android:textStyle="bold"
             tools:text="שם העסק" />
+
+        <TextView
+            android:id="@+id/businessAddressTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="16sp"
+            android:textColor="?attr/colorPrimary"
+            tools:text="כתובת: רחוב הרצל 10, תל אביב" />
+
+        <TextView
+            android:id="@+id/businessDescriptionTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textSize="16sp"
+            android:lineSpacingExtra="4dp"
+            tools:text="כאן יופיע תיאור העסק שהבעלים כתב..." />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/darker_gray" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -54,7 +78,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="בחר תאריך:"
+            android:text="בחר תאריך להזמנה:"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -63,8 +87,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp" />
-
-        <!-- TODO: Add button to proceed with booking -->
 
     </LinearLayout>
 </ScrollView>

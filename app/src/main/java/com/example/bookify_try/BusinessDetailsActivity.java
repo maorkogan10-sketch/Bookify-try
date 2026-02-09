@@ -18,7 +18,7 @@ public class BusinessDetailsActivity extends AppCompatActivity {
 
     public static final String EXTRA_BUSINESS_ID = "com.example.bookify_try.EXTRA_BUSINESS_ID";
 
-    private TextView businessNameTextView, workingHoursTextView, resourcesTextView;
+    private TextView businessNameTextView, businessAddressTextView, businessDescriptionTextView, workingHoursTextView, resourcesTextView;
     private CalendarView calendarView;
 
     private FirebaseFirestore db;
@@ -32,9 +32,14 @@ public class BusinessDetailsActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         businessNameTextView = findViewById(R.id.businessNameTextView);
+        businessAddressTextView = findViewById(R.id.businessAddressTextView);
+        businessDescriptionTextView = findViewById(R.id.businessDescriptionTextView);
         workingHoursTextView = findViewById(R.id.workingHoursTextView);
         resourcesTextView = findViewById(R.id.resourcesTextView);
         calendarView = findViewById(R.id.calendarView);
+
+        // הגבלת לוח השנה לתאריך הנוכחי והלאה
+        calendarView.setMinDate(System.currentTimeMillis() - 1000);
 
         businessId = getIntent().getStringExtra(EXTRA_BUSINESS_ID);
 
@@ -75,6 +80,18 @@ public class BusinessDetailsActivity extends AppCompatActivity {
 
     private void displayBusinessDetails(Business business) {
         businessNameTextView.setText(business.getBusinessName());
+        
+        if (business.getAddress() != null && !business.getAddress().isEmpty()) {
+            businessAddressTextView.setText("כתובת: " + business.getAddress());
+        } else {
+            businessAddressTextView.setText("כתובת לא צוינה");
+        }
+
+        if (business.getDescription() != null && !business.getDescription().isEmpty()) {
+            businessDescriptionTextView.setText(business.getDescription());
+        } else {
+            businessDescriptionTextView.setText("אין תיאור זמין לעסק זה.");
+        }
 
         if (business.getResources() != null) {
             String resourcesString = business.getResources().stream()

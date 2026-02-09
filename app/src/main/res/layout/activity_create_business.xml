@@ -39,6 +39,44 @@
                 android:layout_height="wrap_content" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Business Address -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/businessAddressInputLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="כתובת העסק"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/businessNameInputLayout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/businessAddressEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Business Description -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/businessDescriptionInputLayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="תיאור העסק"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/businessAddressInputLayout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/businessDescriptionEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:minLines="3" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <!-- Resources Section -->
         <TextView
             android:id="@+id/resourcesTitle"
@@ -49,7 +87,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/businessNameInputLayout" />
+            app:layout_constraintTop_toBottomOf="@id/businessDescriptionInputLayout" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/addResourceButton"
