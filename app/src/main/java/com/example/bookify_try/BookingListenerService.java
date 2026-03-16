@@ -39,7 +39,7 @@ public class BookingListenerService extends Service {
             return;
         }
 
-        // האזנה בזמן אמת לשינויים בהזמנות של העסק הזה
+        // מאזין לשינוי בהזמנות של העסק
         listenerRegistration = db.collection("bookings")
                 .whereEqualTo("businessId", ownerId)
                 .addSnapshotListener((value, error) -> {
@@ -49,7 +49,7 @@ public class BookingListenerService extends Service {
                     }
 
                     if (value != null) {
-                        // התעלמות מהריצה הראשונה שטוענת את הנתונים הקיימים
+                        // מתעלם כשטוען את הנתונים הקיימים פעם ראשונה
                         if (isFirstRun) {
                             isFirstRun = false;
                             return;
@@ -78,7 +78,7 @@ public class BookingListenerService extends Service {
                                     break;
                                     
                                 case MODIFIED:
-                                    // אופציונלי: אפשר להוסיף כאן התראה גם על עדכון הזמנה אם תרצה בעתיד
+                                    // עדכון הזמנה - לעתיד
                                     break;
                             }
                         }

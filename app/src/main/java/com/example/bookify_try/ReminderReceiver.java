@@ -20,7 +20,7 @@ public class ReminderReceiver extends BroadcastReceiver {
 
         Log.d(TAG, "Showing notification: " + title + " - " + message);
 
-        // הקפצת ההתראה באמצעות ה-Helper שיצרנו
+        // מקפית את ההתראה בעזרת HELPER שיצרתי לפני
         NotificationHelper.showNotification(context, title, message);
     }
 }

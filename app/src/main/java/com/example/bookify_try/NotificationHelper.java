@@ -13,7 +13,7 @@ public class NotificationHelper {
     private static final String CHANNEL_NAME = "Booking Reminders";
     private static final String CHANNEL_DESC = "Notifications for upcoming bookings";
 
-    // יצירת ערוץ התראות (חובה החל מאנדרואיד 8.0)
+    // כאן יוצרים ערוץ התראות
     public static void createNotificationChannel(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
@@ -39,7 +39,7 @@ public class NotificationHelper {
                 .setAutoCancel(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        // בדיקת הרשאה (חובה באנדרואיד 13+)
+        // בדיקת הרשאה בטלפון אם האפליקציה יכולה לשלוח לי התראות
         try {
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
         } catch (SecurityException e) {
