@@ -57,12 +57,13 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
+//כאן אני יוצר משתמש חדש בAUTH ולוקח את הקלט מהאדיט טקסטים לתוך הפיירבייס
     private void createAccount() {
         String fullName = fullNameEditText.getText().toString().trim();
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
-        // --- Input Validation ---
+        // בדיקות שהפרטים שהוזנו לא ריקים
         if (TextUtils.isEmpty(fullName)) {
             fullNameEditText.setError("יש למלא שם מלא.");
             return;
@@ -89,14 +90,15 @@ public class SignUpActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, now save user data to Firestore
+                            // ההרשמה הצליחה אז אנחנו שומרים את הנתונים בFIRESRORE
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser firebaseUser = mAuth.getCurrentUser();
                             if (firebaseUser != null) {
+                                //המשתמש רשום בAUTH, אבל צריך גם לשמור אותו בDATA אז שולחים את הפרטים לפונקציה שתשמור את הפרטים בדאטא
                                 saveUserDataToFirestore(firebaseUser, fullName);
                             }
                         } else {
-                            // If sign in fails, display a message to the user.
+                            // אם ההרשמה נכשלה, שולחים הודעת שגיאה
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(SignUpActivity.this, "הרשמה נכשלה: " + task.getException().getMessage(),
                                     Toast.LENGTH_LONG).show();
@@ -104,17 +106,23 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 });
     }
-
+    //הפונקציה מקבלת את המשתמש מהAUTH ואת השם שלו, ויוצרת בFIRESTORE את המשתמש כבעל עסק / לקוח
     private void saveUserDataToFirestore(FirebaseUser firebaseUser, String fullName) {
         String email = firebaseUser.getEmail();
         String uid = firebaseUser.getUid();
 
+        //בדיקת סוג המשתמש - לקוח / בעל עסק
         int selectedId = userTypeRadioGroup.getCheckedRadioButtonId();
-        String userType = (selectedId == R.id.customerRadioButton) ? "Customer" : "Owner";
-
+        String userType;
+        if(selectedId == R.id.customerRadioButton){
+            userType = "Customer" ;
+        } else {
+            userType = "Owner";
+        }
+        //יוצר אובייקט של יוזר
         User user = new User(fullName, email, userType);
 
-        // יוצרים כאן DOCUMENT חדש עם האיי די
+        // יוצרים כאן DOCUMENT חדש עם האיי די בתוך האוסף של הUSERS
         db.collection("users").document(uid)
                 .set(user)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -125,6 +133,7 @@ public class SignUpActivity extends AppCompatActivity {
 
                         // סוגר את כל המסכים שהיו פתוחים עד עכשיו ומחזיר למסך הבית
                         Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
+                        //מחזיר את הMAIN ACTIVITY להיות המסך הראשון וסוגר את כל המסכים שמעליו במחסנית
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         finish(); // סוגר לגמרי

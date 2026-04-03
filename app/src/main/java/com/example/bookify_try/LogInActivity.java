@@ -38,6 +38,7 @@ public class LogInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
 
+        //מתחבר לפיירבייס
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
@@ -61,10 +62,12 @@ public class LogInActivity extends AppCompatActivity {
         });
     }
 
+    //הפונקציה לא מקבלת כלום וזאת הפונקציה שבעצם מבצעת את סיום תהליך ההרשמה - מתרחשת כשלוחצים על כפתור ההרשמה
     private void logInUser() {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
+        //בודק שלא הזינו טקסט ריק
         if (TextUtils.isEmpty(email)) {
             emailEditText.setError("יש למלא כתובת אימייל.");
             return;
@@ -75,6 +78,7 @@ public class LogInActivity extends AppCompatActivity {
             return;
         }
 
+        //משתמש בפונקציה של AUTH של התחברות למערכת באמצעות המייל והסיסמא
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -94,23 +98,27 @@ public class LogInActivity extends AppCompatActivity {
                 });
     }
 
+    //הפונקציה מקבלת את הUID של המשתמש בפיירבייס ומנתבת אותו לאן שהוא צריך להגיע - לקוח/בעל עסק
     private void redirectUser(String userId) {
+        //הולך לאוסף הUSERS, ומביא את המסך עם הUID שקיבל
         db.collection("users").document(userId).get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
+                            //משתנה שמחזיק את המסמך שהוציא
                             DocumentSnapshot document = task.getResult();
                             if (document != null && document.exists()) {
+                                //סוג הלקוח
                                 String userType = document.getString("userType");
                                 Toast.makeText(LogInActivity.this, "התחברות מוצלחת!", Toast.LENGTH_SHORT).show();
-
+                                //בעל עסק, מנתב אותו למסך הבית של בעל העסק. אם לא אז מנתב למסך הבית של הלקוח
                                 if ("Owner".equals(userType)) {
                                     startActivity(new Intent(LogInActivity.this, OwnerHomeActivity.class));
                                 } else {
                                     startActivity(new Intent(LogInActivity.this, CustomerHomeActivity.class));
                                 }
-                                finishAffinity(); // Finish all activities in the stack
+                                finishAffinity(); // סוגר את כל הACTIVITY שפתוחות כדי שהמחסנית תתרוקן והמסך הבא יהיה הראשון שקיים במחסנית
                             } else {
                                 Log.d(TAG, "No such document");
                                 Toast.makeText(LogInActivity.this, "שגיאה בטעינת נתוני משתמש.", Toast.LENGTH_SHORT).show();
@@ -125,14 +133,17 @@ public class LogInActivity extends AppCompatActivity {
                 });
     }
 
+    //הפונקציה לא מקבלת כלום ושולחת את הלקוח לאיפוס סיסמא
     private void resetPassword() {
         String email = emailEditText.getText().toString().trim();
 
+        //בודק אם האימייל ריק
         if (TextUtils.isEmpty(email)) {
             emailEditText.setError("יש למלא כתובת אימייל כדי לאפס סיסמה.");
             return;
         }
 
+        //משתמש בפעולה שAUTH עושה שנותן לשחזר סיסמא באמצעות מייל
         mAuth.sendPasswordResetEmail(email)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
