@@ -35,20 +35,24 @@ public class SearchBusinessActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_business);
 
+        //חיבור לפיירסטור
         db = FirebaseFirestore.getInstance();
 
         businessesRecyclerView = findViewById(R.id.businessesRecyclerView);
+        //גודל הרשימה לא משתנה
         businessesRecyclerView.setHasFixedSize(true);
+        //קובע איך האובייקטים ברשימה יסתדרו - אחד מתחת לשני
         businessesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         businessAdapter = new BusinessAdapter();
+        //חיבור האדפטר לרשימה
         businessesRecyclerView.setAdapter(businessAdapter);
 
         SearchView searchView = findViewById(R.id.searchView);
-        setupSearchView(searchView);
-        setupItemClickListener();
+        setupSearchView(searchView); //הפונקציה שמנהלת את החיפוש. מאזינה לשינויים בו
+        setupItemClickListener(); //אם איבר ברשימה נלחץ
 
-        loadBusinesses();
+        loadBusinesses(); //העלאת העסקים לרשימה והשמה באמצעות האדפטר בתוך הריסייקל ויו
     }
 
     private void loadBusinesses() {
@@ -56,16 +60,20 @@ public class SearchBusinessActivity extends AppCompatActivity {
         db.collection("businesses")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    fullBusinessList.clear();
+                    fullBusinessList.clear(); //מנקה את הרשימה מדברים קודמים
+                    //לולאה שמוסיפה את העסקים לרשימה מתוך האוסף של businesses
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         try {
+                            //המרת המסמך מהדאטה בייס לאובייקט
                             Business business = document.toObject(Business.class);
+                            //הוספת האובייקט לרשימה
                             fullBusinessList.add(business);
                         } catch (Exception e) {
                             Log.e(TAG, "Error converting document to Business object", e);
                         }
                     }
                     Log.d(TAG, "Successfully loaded and parsed " + fullBusinessList.size() + " businesses.");
+                    //קריאה לאדפטר - הרשימה הושלמה, צייר אותה על המסך
                     businessAdapter.submitList(new ArrayList<>(fullBusinessList));
                 })
                 .addOnFailureListener(e -> {
@@ -75,42 +83,57 @@ public class SearchBusinessActivity extends AppCompatActivity {
                 });
     }
 
+    //הפונקציה מקבלת את התיבת חיפוש של הXML ומנהלת אותה - מאזינה לשינויים של ומשתמשת בפונקציות אחרות כדי לסנן
     private void setupSearchView(SearchView searchView) {
+        // מאזין לתיבת החיפוש
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            //בלי שימוש
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
             }
 
+            //פונקצייה מובנית שקורית בכל פעם שמוסיפים או מוחקים אות
             @Override
             public boolean onQueryTextChange(String newText) {
+                //קריאה לפילטר
                 filter(newText);
                 return true;
             }
         });
     }
 
+    // הפונקציה מקבלת את טקסט החיפוש שהוזן באותו רגע ומסננת את מה שלא תואם ברשימה שמוצגת
     private void filter(String text) {
+        //רשימה זמנית של כל העסקים שמתאימים למה שכתוב בתיבת החיפוש
         List<Business> filteredList = new ArrayList<>();
+        //אם התיבה ריקה, הוספת כל העסקים שברשימה
         if (text.isEmpty()) {
             filteredList.addAll(fullBusinessList);
         } else {
             for (Business item : fullBusinessList) {
+                //בדיקה אם העסק לא ריק וגם העסק מכיל את הטקסט שהוזן
                 if (item.getBusinessName() != null && item.getBusinessName().toLowerCase().contains(text.toLowerCase())) {
+                    //הוספה לרשימה הזמנית
                     filteredList.add(item);
                 }
             }
         }
+        // עדכון התצוגה רק לרשימה הזמנית באמצעו הפונקציה של האדפטר
         businessAdapter.submitList(filteredList);
     }
 
+    //הפונקציה לא מקבלת דבר ושולחת את המשתמש לדף של העסק שעליו הוא לחץ - פונקציה שיורשים מהאדפטר
     private void setupItemClickListener() {
+        //אם המשתמש לחץ על אחד העסקים שברשימה
         businessAdapter.setOnItemClickListener(business -> {
+            //עובר למסך פרטי עסק של העסק שנלחץ
             Intent intent = new Intent(SearchBusinessActivity.this, BusinessDetailsActivity.class);
             if (business.getOwnerId() == null) {
                 Toast.makeText(this, "Error: Business has no owner ID.", Toast.LENGTH_SHORT).show();
                 return;
             }
+            //שומרים את הID כדי שהאנדרואיד ידע לאיזה מסך צריך ללכת
             intent.putExtra(BusinessDetailsActivity.EXTRA_BUSINESS_ID, business.getOwnerId());
             startActivity(intent);
         });

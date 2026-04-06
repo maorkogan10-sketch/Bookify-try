@@ -13,6 +13,6 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
-    <!-- We can add more details here later, like business type or address -->
+
 
 </LinearLayout>
