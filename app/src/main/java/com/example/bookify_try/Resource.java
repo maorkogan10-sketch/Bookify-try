@@ -2,10 +2,9 @@ package com.example.bookify_try;
 
 public class Resource {
     private String name;
-    private int capacity; // How many people can use one instance of this resource
-    private int quantity; // How many of this resource are available
+    private int capacity; // כמה אנשים יכול להכיל כל משאב
+    private int quantity; // כמה יש מכל משאב כזה
 
-    // Required empty constructor for Firestore
     public Resource() {
     }
 
@@ -15,7 +14,6 @@ public class Resource {
         this.quantity = quantity;
     }
 
-    // Getters and Setters
     public String getName() {
         return name;
     }

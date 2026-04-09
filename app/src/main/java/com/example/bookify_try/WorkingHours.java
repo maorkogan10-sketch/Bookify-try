@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WorkingHours {
-    private String dayOfWeek; // e.g., "Sunday"
+    private String dayOfWeek;
     private List<TimeSlot> timeSlots;
 
-    // Required empty constructor for Firestore
     public WorkingHours() {
         this.timeSlots = new ArrayList<>();
     }
@@ -17,7 +16,6 @@ public class WorkingHours {
         this.timeSlots = new ArrayList<>();
     }
 
-    // Getters and Setters
     public String getDayOfWeek() {
         return dayOfWeek;
     }

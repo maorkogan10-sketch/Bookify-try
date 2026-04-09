@@ -6,7 +6,6 @@ public class TimeSlot {
     private int endHour;
     private int endMinute;
 
-    // Required empty constructor for Firestore
     public TimeSlot() {
     }
 
@@ -17,7 +16,6 @@ public class TimeSlot {
         this.endMinute = endMinute;
     }
 
-    // Getters and Setters
     public int getStartHour() {
         return startHour;
     }
