@@ -13,33 +13,42 @@ public class NotificationHelper {
     private static final String CHANNEL_NAME = "Booking Reminders";
     private static final String CHANNEL_DESC = "Notifications for upcoming bookings";
 
-    // כאן יוצרים ערוץ התראות
+    /// /
+    // הפונקציה מקבלת את המסך שבו נמצאים ויוצרת ערוץ שבו יהיה ניתן לשלוח את ההתראות
+
     public static void createNotificationChannel(Context context) {
+        //בודק אם הגרסה הנוכחית של הטלפון מחייבת לפתוח ערוץ
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            //יוצר אובייקט של ערוץ חדש עם המשתנים שהגדרנו בהתחלה
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     CHANNEL_NAME,
                     NotificationManager.IMPORTANCE_DEFAULT);
             channel.setDescription(CHANNEL_DESC);
-            
+
+            //מבקש ממערכת ההפעלה של הטלפון את המנהל שאחראי על המשימות
             NotificationManager manager = context.getSystemService(NotificationManager.class);
             if (manager != null) {
+                //המנהל רושם את הערוץ בתוך מערכת ההפעלה של הטלפון
                 manager.createNotificationChannel(channel);
             }
         }
     }
+    /// /
 
-    // פונקציה פשוטה להקפצת התראה
+    // הפונקציה מקבלת את המסך והטקסטים של ההודעה שרוצים להקפיץ ומראה את ההודעה בפועל
     public static void showNotification(Context context, String title, String message) {
+        //מעצב את ההתראה - אייקון, כתובת מודגשת, טקסט...
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info) // לוגו זמני של אנדרואיד
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true);
 
+        //מנהל התראות שיודע לעבוד עם כל הגרסאות
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        // בדיקת הרשאה בטלפון אם האפליקציה יכולה לשלוח לי התראות
+        //ונ בדיקת הרשאה בטלפון אם האפליקציה יכולה לשלוח לי התראות ונותנים למערכת מספר ייחודי
         try {
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
         } catch (SecurityException e) {

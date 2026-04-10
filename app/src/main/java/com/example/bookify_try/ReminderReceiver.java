@@ -11,10 +11,12 @@ public class ReminderReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "!!! ReminderReceiver received the broadcast !!!");
-        
+
+        //תוכן ההתראה
         String title = intent.getStringExtra("title");
         String message = intent.getStringExtra("message");
 
+        //אם הוא לא קיבל את האינטנט זה ברירת מחדל
         if (title == null) title = "תזכורת להזמנה";
         if (message == null) message = "יש לך הזמנה למחר!";
 
