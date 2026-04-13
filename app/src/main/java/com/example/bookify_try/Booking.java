@@ -3,14 +3,13 @@ package com.example.bookify_try;
 import com.google.firebase.Timestamp;
 
 public class Booking {
-    private String bookingId; // Firestore document ID
+    private String bookingId; // הID של המסמך בפיירסטור
     private String businessId;
     private String customerId;
     private String resourceName;
     private Timestamp startTime;
     private Timestamp endTime;
 
-    // Required empty constructor for Firestore
     public Booking() {
     }
 
@@ -23,7 +22,6 @@ public class Booking {
         this.endTime = endTime;
     }
 
-    // Getters and Setters
     public String getBookingId() {
         return bookingId;
     }

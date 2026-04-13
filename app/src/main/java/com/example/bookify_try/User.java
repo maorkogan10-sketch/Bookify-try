@@ -3,9 +3,8 @@ package com.example.bookify_try;
 public class User {
     private String fullName;
     private String email;
-    private String userType; // "Customer" or "Owner"
+    private String userType; //לקוח או בעל עסק
 
-    // Required empty public constructor for Firestore
     public User() {
     }
 
@@ -15,7 +14,6 @@ public class User {
         this.userType = userType;
     }
 
-    // Getters and Setters
     public String getFullName() {
         return fullName;
     }
