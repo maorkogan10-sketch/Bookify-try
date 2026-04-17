@@ -15,7 +15,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Group for when business exists -->
+    <!-- קבוצת כפתורים לאם העסק קיים -->
     <LinearLayout
         android:id="@+id/businessExistsGroup"
         android:layout_width="wrap_content"
@@ -45,7 +45,7 @@
 
     </LinearLayout>
 
-    <!-- Button for when no business exists -->
+    <!-- אם העסק לא קיים -->
     <Button
         android:id="@+id/createBusinessButton"
         style="@style/Widget.Material3.Button.TonalButton"
