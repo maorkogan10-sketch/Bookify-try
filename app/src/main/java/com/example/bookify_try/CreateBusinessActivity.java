@@ -47,9 +47,9 @@ public class CreateBusinessActivity extends AppCompatActivity {
 
     public static final String EXTRA_BUSINESS_ID = "EXTRA_BUSINESS_ID";
     //לא אמורים לקבל את האקסטרות האלה הלקוח לא אמור להגיע למסך הזה השארתי את זה אופציונלית ליתר ביטחון
-    public static final String EXTRA_YEAR = "EXTRA_YEAR";
-    public static final String EXTRA_MONTH = "EXTRA_MONTH";
-    public static final String EXTRA_DAY = "EXTRA_DAY";
+     public static final String EXTRA_YEAR = "EXTRA_YEAR";
+    //public static final String EXTRA_MONTH = "EXTRA_MONTH";
+    //public static final String EXTRA_DAY = "EXTRA_DAY";
 
     private TextInputEditText businessNameEditText, businessAddressEditText, businessDescriptionEditText;
     //מכולות שאליהן אפשר לשים קוד בזמן אמת - המשאבים ולוחות הזמנים
