@@ -10,12 +10,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/// /
 public class DailyBookingsAdapter extends RecyclerView.Adapter<DailyBookingsAdapter.ViewHolder> {
 
+    //יוצר רשימה של אובייקטים מסוג BookingWithUser (מכיל הזמנה ויוזר)
     private final List<BookingWithUser> bookings = new ArrayList<>();
+    //מאזין כשלוחצים על איבר ברשימה
     private OnItemClickListener listener;
 
+    //פונקצייה שחייב לרשת
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -65,3 +68,4 @@ public class DailyBookingsAdapter extends RecyclerView.Adapter<DailyBookingsAdap
         }
     }
 }
+////
