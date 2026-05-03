@@ -2,11 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- מבקש להשתמש באינטרנט -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- בקשה לשליחת התראות -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- מאפשר לתזמן דברים -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- מאפשר להריץ סרוויס -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <!-- דברים חשוביפ כמו שם האפליקציה האייקון שלה  -->
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -16,7 +21,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.BookifyTry">
-        
+
+        <!-- המסך הראשון - מאין אקטיביטי -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -25,7 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <!-- כל המסכים באפליקציה -->
         <activity android:name=".SignUpActivity" android:exported="false" />
         <activity android:name=".LogInActivity" android:exported="false" />
         <activity android:name=".CustomerHomeActivity" android:exported="false" />
@@ -38,9 +44,10 @@
         <activity android:name=".DailyBookingsActivity" android:exported="false" />
         <activity android:name=".MyBookingsActivity" android:exported="false" />
 
+        <!-- הרכיב שמאפשר את שליחת התזכורות -->
         <receiver android:name=".ReminderReceiver" android:enabled="true" android:exported="false" />
 
-        <!-- רישום השירות לבעל העסק -->
+        <!-- הסרוויס של בעל העסק -->
         <service android:name=".BookingListenerService" android:enabled="true" android:exported="false" />
 
     </application>

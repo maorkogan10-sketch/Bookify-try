@@ -39,12 +39,13 @@ public class CreateBookingActivity extends AppCompatActivity {
     //מספר מזהה שנשתמש בו לבקש רשות מהמשתמש לשלוח התראות
     private static final int NOTIFICATION_PERMISSION_CODE = 123;
 
-    //משתנים של הרמזים שיחתברו לרמזים שקיבלנו מהמסך הקודם
+    //משתנים של רמזים שיחזיקו את הרמזים מהמסך הקודם
     public static final String EXTRA_BUSINESS_ID = "EXTRA_BUSINESS_ID";
     public static final String EXTRA_YEAR = "EXTRA_YEAR";
     public static final String EXTRA_MONTH = "EXTRA_MONTH";
     public static final String EXTRA_DAY = "EXTRA_DAY";
 
+    //אפשרות בחירה שבתוכה יש את כל המשאבים
     private Spinner resourceSpinner;
     private Button startTimeButton, endTimeButton, confirmBookingButton;
 
@@ -61,16 +62,18 @@ public class CreateBookingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_booking);
 
+        //חיבור לפיירבייס
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
+        //חיבור לXML
         TextView selectedDateTextView = findViewById(R.id.selectedDateTextView);
         resourceSpinner = findViewById(R.id.resourceSpinner);
         startTimeButton = findViewById(R.id.startTimeButton);
         endTimeButton = findViewById(R.id.endTimeButton);
         confirmBookingButton = findViewById(R.id.confirmBookingButton);
 
-        //קבלת הרמזים מהמסך הקודם
+        // חיבור הרמזים מהמסך הקודם
         Intent intent = getIntent();
         businessId = intent.getStringExtra(EXTRA_BUSINESS_ID);
         year = intent.getIntExtra(EXTRA_YEAR, -1);
@@ -84,7 +87,7 @@ public class CreateBookingActivity extends AppCompatActivity {
             return;
         }
 
-        //משנה את הטקסט במסך כך שייראה את התאריך שאותו בחרו בלוח השנה להזמין בו
+        //משנה את הכותרת במסך כך שייראה את התאריך שאותו בחרו בלוח השנה להזמין בו
         selectedDateTextView.setText(String.format(Locale.getDefault(), "תאריך: %d/%d/%d", day, month + 1, year));
 
         //קריאה לפונקציה שמעלה את הנתונים לספינר (סוגי המשאבים)
@@ -142,12 +145,13 @@ public class CreateBookingActivity extends AppCompatActivity {
                         business = documentSnapshot.toObject(Business.class);
                         //אם העסק לא ריק ורשימת המשאבים לא ריקה
                         if (business != null && business.getResources() != null) {
-                            //יוצר רשימה של כל המשאבים שיש לעסק ולוקח רק את השם שלהם
+                            //יוצר רשימה של כל המשאבים שיש לעסק, הופך אותם לפס ייצור אחד אחרי השני (STREAM) לוקח רק את השם שלהם (MAP) ושם אותם בתוך הרשימה (COLLECT)
                             List<String> resourceNames = business.getResources().stream()
                                     .map(Resource::getName)
                                     .collect(Collectors.toList());
                             //יוצר אוביקט של אדפטר חדש שכבר מובנה בתוך האנרואיד ולא היה צריך ליצור אותו שמותאם להצגה בסיסית בספינר
                             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, resourceNames);
+                            //אומר לספינר שכשהוא נפתח שישמתמש בתפריט נפתח שהמשאבים יהיו בו אחד מתחת לשני
                             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                             //מחבר את האדפטר לספינר
                             resourceSpinner.setAdapter(adapter);
@@ -158,7 +162,7 @@ public class CreateBookingActivity extends AppCompatActivity {
 
     //הפונקציה מקבלת האם השעון צריך להציג את שעת ההתחלה או שעת הסיום לפי הBOOL ולא מחזירה כלום ובעצם מציגה את השעון העגול של אנדוראיד ושומרת את השעה שהמשתמש בחר
     private void showTimePicker(boolean isStartTime) {
-        //רכיב מוכן של אנדרואיד שמקפיץ את החלון עם ונותן לו להזין שעות ודקות
+        //רכיב מוכן של דיאלוג שמובנה באנדרואיד שמקפיץ את החלון עם ונותן לו להזין שעות ודקות
         TimePickerDialog timePicker = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
             //יוצר אובייקט לוח שנה חדש שמחזיק את הזמן של כרגע
             Calendar selectedTime = Calendar.getInstance();
@@ -175,7 +179,7 @@ public class CreateBookingActivity extends AppCompatActivity {
                 endTimeButton.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
             }
         }, 9, 0, true); //ברירת מחדל של מה השעון יציג בתצוגה ראשונית
-        //קורא לפונקציה TIMEPICKER
+        //קורא לפונקציה TIMEPICKER שמראה את השעון עצמו
         timePicker.show();
     }
 
@@ -217,6 +221,7 @@ public class CreateBookingActivity extends AppCompatActivity {
     // הפונקציה מקבלת את זמן ההתחלה, הסיום, שם המשאב והכמות מאותו משאב ובודקת האם ניתן להשלים את ההזמנה ויש מקום פנוי
     private void checkCollisionsAndSave(Timestamp start, Timestamp end, String resourceName, int resourceQuantity) {
         //הולך לקולקשן bookings, לוקח רק את ההזמנות של העסק הזה, רק של המשאב הזה, ורק את ההזמנו שמתחילות לפני שההזמנה הזו מסתיימת
+        //משתמש באינדקס השני כי התנאים משלבים כמה דברים שונים - זמן ושם
         db.collection("bookings")
                 .whereEqualTo("businessId", businessId)
                 .whereEqualTo("resourceName", resourceName)
@@ -225,7 +230,9 @@ public class CreateBookingActivity extends AppCompatActivity {
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     //משתנה שיחזיק כמה הזמנות חופפות להזמנה שלנו
                     int conflictingBookingsCount = 0;
+                    //לולאה שעוברת על כל המסמכים שעמדו בקריטריונים
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        //המרה לאובייקט
                         Booking existing = document.toObject(Booking.class);
                         if (existing.getEndTime().compareTo(start) > 0) {
                             conflictingBookingsCount++;
@@ -246,7 +253,7 @@ public class CreateBookingActivity extends AppCompatActivity {
     private void saveBooking(Timestamp start, Timestamp end, String resource) {
         //מוציא מהAUTH את הUID הייחודי של המשתמש
         String customerId = Objects.requireNonNull(mAuth.getCurrentUser()).getUid();
-        //מבקש מפיירבייס לייצר ID הזמנה חדש
+        //מבקש מפיירבייס לייצר מסמך על שם הID של הזמנה חדשה
         String bookingId = db.collection("bookings").document().getId();
         //יוצר אובייקט הזמנה חדש
         Booking booking = new Booking(bookingId, businessId, customerId, resource, start, end);
@@ -283,22 +290,25 @@ public class CreateBookingActivity extends AppCompatActivity {
         intent.putExtra("title", "תזכורת להזמנה");
         intent.putExtra("message", "יש לך הזמנה ל-" + booking.getResourceName() + " בעוד שעה. ניפגש! ");
 
-        //אישור למערכת להשתמש באינטנט אוטומטית
+        /// /
+        //אישור למערכת להשתמש באינטנט של הRECIVER אוטומטית
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 this, 
                 booking.getBookingId().hashCode(), 
                 intent, 
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
+        /// /
         //בודק שהשירות לא ריק
         if (alarmManager != null) {
             try {
                 //גם אם הטלפון במצב של חיסכון בסוללה שולחים את ההתראה
+                //קורא לאלרם מנגר עם האלרם מנגר, הזמן, והאינטנט של הRECIVER שבו בנויה ההודעה עצמה
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminderTimeMillis, pendingIntent);
             } catch (SecurityException e) {
                 alarmManager.set(AlarmManager.RTC_WAKEUP, reminderTimeMillis, pendingIntent);
             }
         }
+        /// /
     }
 
     //הפונקציה מקבלת את השעות שהמשתמש בחר ובודקת האם הן נמצאות בתוך תחום הפעילות של העסק
