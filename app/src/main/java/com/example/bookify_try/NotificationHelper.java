@@ -8,6 +8,7 @@ import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+//המסך לפתיחת ערוץ ההתראות
 public class NotificationHelper {
     public static final String CHANNEL_ID = "booking_reminders";
     private static final String CHANNEL_NAME = "Booking Reminders";

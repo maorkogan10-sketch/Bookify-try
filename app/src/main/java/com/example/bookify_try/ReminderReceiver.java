@@ -8,11 +8,12 @@ import android.util.Log;
 public class ReminderReceiver extends BroadcastReceiver {
     private static final String TAG = "ReminderReceiver";
 
+    //האון רסיב עצמו, מקבל את התוכן של ההודעה ואינטנט
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "!!! ReminderReceiver received the broadcast !!!");
 
-        //תוכן ההתראה
+        // תוכן ההתראה - מקבל את זה ממי שקורא לו
         String title = intent.getStringExtra("title");
         String message = intent.getStringExtra("message");
 
