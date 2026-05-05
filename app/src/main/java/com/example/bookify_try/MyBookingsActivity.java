@@ -97,6 +97,7 @@ public class MyBookingsActivity extends AppCompatActivity {
         Timestamp now = new Timestamp(new Date());
 
         //הולך לתיקיית הזמנות, רק להזמנות של הלקוח עם הID ששמרנו, שמתחילות אחריי הזמן הנוכחי
+        //משתמש באינדקס
         db.collection("bookings")
                 .whereEqualTo("customerId", customerId)
                 //יצרנו אינדקס בתור הפיירבייס ששואל את השאלה הזאת

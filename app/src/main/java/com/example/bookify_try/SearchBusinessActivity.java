@@ -25,8 +25,12 @@ public class SearchBusinessActivity extends AppCompatActivity {
 
     private static final String TAG = "SearchBusinessActivity";
 
+    //הרשימה המתעדכנת
     private RecyclerView businessesRecyclerView;
+
+    //משתנה של אדפטר שמציג את רשימת העסקים בחיפוש
     private BusinessAdapter businessAdapter;
+    //רשימת העסקים
     private final List<Business> fullBusinessList = new ArrayList<>();
     private FirebaseFirestore db;
 
@@ -38,16 +42,18 @@ public class SearchBusinessActivity extends AppCompatActivity {
         //חיבור לפיירסטור
         db = FirebaseFirestore.getInstance();
 
+        //חיבור לריסייקל ויו
         businessesRecyclerView = findViewById(R.id.businessesRecyclerView);
         //גודל הרשימה לא משתנה
         businessesRecyclerView.setHasFixedSize(true);
         //קובע איך האובייקטים ברשימה יסתדרו - אחד מתחת לשני
         businessesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
+        //יוצר אדפטר חדש
         businessAdapter = new BusinessAdapter();
         //חיבור האדפטר לרשימה
         businessesRecyclerView.setAdapter(businessAdapter);
 
+        //יצירת חיפוש וחיבור לXML
         SearchView searchView = findViewById(R.id.searchView);
         setupSearchView(searchView); //הפונקציה שמנהלת את החיפוש. מאזינה לשינויים בו
         setupItemClickListener(); //אם איבר ברשימה נלחץ
@@ -55,12 +61,15 @@ public class SearchBusinessActivity extends AppCompatActivity {
         loadBusinesses(); //העלאת העסקים לרשימה והשמה באמצעות האדפטר בתוך הריסייקל ויו
     }
 
+    //הפונקציה לא מקבלת כלום ומעלה את רשימת העסקים באמצעות האדפטר והריסייקל
     private void loadBusinesses() {
         Log.d(TAG, "Attempting to load businesses from Firestore...");
+        //הולך לאוסף העסקים
         db.collection("businesses")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     fullBusinessList.clear(); //מנקה את הרשימה מדברים קודמים
+                    /// /
                     //לולאה שמוסיפה את העסקים לרשימה מתוך האוסף של businesses
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         try {
@@ -72,10 +81,12 @@ public class SearchBusinessActivity extends AppCompatActivity {
                             Log.e(TAG, "Error converting document to Business object", e);
                         }
                     }
+                    /// /
                     Log.d(TAG, "Successfully loaded and parsed " + fullBusinessList.size() + " businesses.");
                     //קריאה לאדפטר - הרשימה הושלמה, צייר אותה על המסך
                     businessAdapter.submitList(new ArrayList<>(fullBusinessList));
                 })
+                //במקרה שלא הצליח להביא צילומי מסך מהפיירסטור
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "******************* FIREBASE LOAD FAILED *******************");
                     Log.e(TAG, "Error loading businesses from Firestore", e);

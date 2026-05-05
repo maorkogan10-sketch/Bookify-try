@@ -85,6 +85,7 @@ public class BookingListenerService extends Service {
                             return;
                         }
 
+                        /// /
                         // לולאה שעוברת על כל שינוי שקרה בנתונים מאז שהמאזין היה מחובר בפעם האחרונה
                         for (DocumentChange dc : value.getDocumentChanges()) {
                             //לוקחים כל הזמנה שעוברים עליה בלולאה והופכים אותה ממסמך לאובייקט

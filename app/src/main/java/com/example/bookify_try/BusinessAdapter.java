@@ -11,23 +11,29 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+//האדפטר שמנהל את רשימת העסקים
 public class BusinessAdapter extends RecyclerView.Adapter<BusinessAdapter.BusinessViewHolder> {
 
+    //רשימת העסקים
     private final List<Business> businessList = new ArrayList<>();
+    //מאזין של לחיצה על אחד העסקים ברשימה
     private OnItemClickListener listener;
 
     @NonNull
-    // יוצר את הקופסא של השורה באמצעות הקוד business_list_item.xml
+    // יוצר את הקופסא - אייטם של השורה באמצעות הקוד business_list_item.xml
     @Override
     public BusinessViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        //יוצר את הנראות של כל שורה ומחבר אותה לITEM שיצרנו
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.business_list_item, parent, false);
         return new BusinessViewHolder(view);
     }
 
-    //חיבור כל עסק לXML
+    //מקבל את ההולדר מהמסך הקודם ואת המיקום של העסק ועושה חיבור כל עסק לXML
     @Override
     public void onBindViewHolder(@NonNull BusinessViewHolder holder, int position) {
+        //אובייקט של העסק הנוכחי
         Business business = businessList.get(position);
+        //משנה את הטקסט לשם העסק
         holder.businessNameTextView.setText(business.getBusinessName());
     }
 
@@ -56,8 +62,9 @@ public class BusinessAdapter extends RecyclerView.Adapter<BusinessAdapter.Busine
         this.listener = listener;
     }
 
-    //קלאס ששומר את מה שיש בשורה בודדת
+    //קלאס ששומר את מה שיש בשורה בודדת - מקשר לאייטם
     class BusinessViewHolder extends RecyclerView.ViewHolder {
+        //שם העסק
         TextView businessNameTextView;
 
         public BusinessViewHolder(@NonNull View itemView) {

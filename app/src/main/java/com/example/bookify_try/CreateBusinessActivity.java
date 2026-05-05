@@ -47,7 +47,7 @@ public class CreateBusinessActivity extends AppCompatActivity {
 
     public static final String EXTRA_BUSINESS_ID = "EXTRA_BUSINESS_ID";
     //לא אמורים לקבל את האקסטרות האלה הלקוח לא אמור להגיע למסך הזה השארתי את זה אופציונלית ליתר ביטחון
-     public static final String EXTRA_YEAR = "EXTRA_YEAR";
+    public static final String EXTRA_YEAR = "EXTRA_YEAR";
     //public static final String EXTRA_MONTH = "EXTRA_MONTH";
     //public static final String EXTRA_DAY = "EXTRA_DAY";
 
@@ -67,12 +67,12 @@ public class CreateBusinessActivity extends AppCompatActivity {
     //שמירה על סדר הימים וקישור בין שם היום לבין מה שמציג את השם שלו בVALUE - XML
     private final Map<String, TextView> dayHoursTextViews = new LinkedHashMap<>();
 //התפריט הנפתח שנותן אפשרויות בחירה ללקוח
-    private Spinner resourceSpinner;
-    private Button startTimeButton, endTimeButton, confirmBookingButton;
-    private int year, month, day;
-    private Calendar startTime, endTime;
-    private Business business;
-    private String businessId;
+    //private Spinner resourceSpinner;
+    //private Button startTimeButton, endTimeButton, confirmBookingButton;
+    //private int year, month, day;
+    //private Calendar startTime, endTime;
+    //private Business business;
+    //private String businessId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -321,7 +321,6 @@ public class CreateBusinessActivity extends AppCompatActivity {
             WorkingHours wh = new WorkingHours(day);
             //מוסיף את האובייקט לרשימה של הימים
             workingHoursList.add(wh);
-            /// /
             // יוצר ITEM של day_working_hours_item שיצרנו
             View v = inf.inflate(R.layout.day_working_hours_item, workingHoursContainer, false);
             //הולכים לשורה של האייטם שנוצר וכותבים את היום הנוכחי בלולאה
@@ -359,7 +358,7 @@ public class CreateBusinessActivity extends AppCompatActivity {
     private void showAddResourceDialog() {
         //יוצר אובייקט של דיאלוג חדש
         AlertDialog.Builder b = new AlertDialog.Builder(this);
-        //יוצר את האובייקט עצמו - משתמש בdialog_add_resource שיצרנו
+        //יוצר את האובייקט עצמו - מה שבתוך הB - משתמש בdialog_add_resource שיצרנו
         View v = getLayoutInflater().inflate(R.layout.dialog_add_resource, null);
         // לוקחים את כל הפרטים שהוזנו בדיאלוג ושם כל אחד מהם במשתנה שלו
         final TextInputEditText nET = v.findViewById(R.id.resourceNameEditText), cET = v.findViewById(R.id.resourceCapacityEditText), qET = v.findViewById(R.id.resourceQuantityEditText);
