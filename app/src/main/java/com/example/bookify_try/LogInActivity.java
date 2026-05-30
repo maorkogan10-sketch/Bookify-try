@@ -36,17 +36,20 @@ public class LogInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //חיבור לXML
         setContentView(R.layout.activity_log_in);
 
         //מתחבר לפיירבייס
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        //מתחבר לרכיבים בXML
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         logInButton = findViewById(R.id.logInButton);
         forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView);
 
+        //לחיצה על כפתור התחברות
         logInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,6 +57,7 @@ public class LogInActivity extends AppCompatActivity {
             }
         });
 
+        //לחיצה על שכחתי סיסמא
         forgotPasswordTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -64,6 +68,7 @@ public class LogInActivity extends AppCompatActivity {
 
     //הפונקציה לא מקבלת כלום וזאת הפונקציה שבעצם מבצעת את סיום תהליך ההרשמה - מתרחשת כשלוחצים על כפתור ההרשמה
     private void logInUser() {
+        //מה שהוזן
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
@@ -83,10 +88,13 @@ public class LogInActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        //אם ההרשמה הצליחה
                         if (task.isSuccessful()) {
                             Log.d(TAG, "signInWithEmail:success");
+                            //מתחבר למשתמש שהתחבר
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
+                                //מנתב את המשתמש למקום המתאים
                                 redirectUser(user.getUid());
                             }
                         } else {
@@ -100,7 +108,7 @@ public class LogInActivity extends AppCompatActivity {
 
     //הפונקציה מקבלת את הUID של המשתמש בפיירבייס ומנתבת אותו לאן שהוא צריך להגיע - לקוח/בעל עסק
     private void redirectUser(String userId) {
-        //הולך לאוסף הUSERS, ומביא את המסך עם הUID שקיבל
+        //הולך לאוסף הUSERS, ומביא את המסמך עם הUID שקיבל
         db.collection("users").document(userId).get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -108,6 +116,7 @@ public class LogInActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             //משתנה שמחזיק את המסמך שהוציא
                             DocumentSnapshot document = task.getResult();
+                            //אם המסמך קיים ולא ריק
                             if (document != null && document.exists()) {
                                 //סוג הלקוח
                                 String userType = document.getString("userType");
@@ -148,6 +157,7 @@ public class LogInActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        //אם הצליח
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Email sent.");
                             Toast.makeText(LogInActivity.this, "מייל לאיפוס סיסמה נשלח לכתובת " + email, Toast.LENGTH_LONG).show();

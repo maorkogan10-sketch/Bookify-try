@@ -2,11 +2,9 @@ package com.example.bookify_try;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,7 +19,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class OwnerHomeActivity extends AppCompatActivity {
 
     private static final String TAG = "OwnerHomeActivity";
-
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -36,6 +33,7 @@ public class OwnerHomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //חיבור לאקסמל
         setContentView(R.layout.activity_owner_home);
 
         //חיבור לפיירבייס
@@ -87,8 +85,8 @@ public class OwnerHomeActivity extends AppCompatActivity {
                 stopService(new Intent(OwnerHomeActivity.this, BookingListenerService.class));
                 //מנתק את המשתמש הנוכחי שמחובר מהAUTH
                 mAuth.signOut();
-                //מעביר למסך הMAIN ACTIVIY
-                Intent intent = new Intent(OwnerHomeActivity.this, MainActivity.class);
+                //מעביר למסך הHOME ACTIVIY
+                Intent intent = new Intent(OwnerHomeActivity.this, HomeActivity.class);
                // מנקה את כל המסכים שהיו פתוחים עד כה
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);

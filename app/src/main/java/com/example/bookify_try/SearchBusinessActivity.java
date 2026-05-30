@@ -25,7 +25,7 @@ public class SearchBusinessActivity extends AppCompatActivity {
 
     private static final String TAG = "SearchBusinessActivity";
 
-    //הרשימה המתעדכנת
+    //הרשימה הממוחזרת שבכל פעם ניתן להציג בה מספר מסוים של רכיבים
     private RecyclerView businessesRecyclerView;
 
     //משתנה של אדפטר שמציג את רשימת העסקים בחיפוש
@@ -37,6 +37,7 @@ public class SearchBusinessActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //חיבור לXML
         setContentView(R.layout.activity_search_business);
 
         //חיבור לפיירסטור
@@ -69,7 +70,7 @@ public class SearchBusinessActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     fullBusinessList.clear(); //מנקה את הרשימה מדברים קודמים
-                    /// /
+                    /// / מקור מספר 1
                     //לולאה שמוסיפה את העסקים לרשימה מתוך האוסף של businesses
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         try {

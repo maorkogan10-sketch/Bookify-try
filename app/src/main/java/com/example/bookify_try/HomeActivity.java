@@ -17,7 +17,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class MainActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
@@ -65,16 +65,16 @@ public class MainActivity extends AppCompatActivity {
                                 String userType = document.getString("userType");
                                 //אם זה בעל עסק להעביר למסך הבית של בעל עסק
                                 if ("Owner".equals(userType)) {
-                                    startActivity(new Intent(MainActivity.this, OwnerHomeActivity.class));
+                                    startActivity(new Intent(HomeActivity.this, OwnerHomeActivity.class));
                                 } else {
                                     //אחרת להעביר למסך בית של הלקוח
-                                    startActivity(new Intent(MainActivity.this, CustomerHomeActivity.class));
+                                    startActivity(new Intent(HomeActivity.this, CustomerHomeActivity.class));
                                 }
                                 finish(); // סוגר את המסך ועובר
                             } else {
                                 // אם הייתה בעיה והמסמך ריק או לא קיים
                                 Log.d(TAG, "No such document");
-                                Toast.makeText(MainActivity.this, "שגיאה בטעינת נתוני משתמש.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(HomeActivity.this, "שגיאה בטעינת נתוני משתמש.", Toast.LENGTH_SHORT).show();
                                 FirebaseAuth.getInstance().signOut();
                                 //להעביר למסך הבית של האפליקציה
                                 showWelcomeScreen();
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                             //אם היה כישלון בהבאת המסמך
                             else {
                             Log.d(TAG, "get failed with ", task.getException());
-                            Toast.makeText(MainActivity.this, "שגיאה בטעינת נתונים.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(HomeActivity.this, "שגיאה בטעינת נתונים.", Toast.LENGTH_SHORT).show();
                             FirebaseAuth.getInstance().signOut();
                             //להעביר למסך הבית של האפליקציה
                             showWelcomeScreen();
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     //הפונקציה לא עושה כלום ומעלה את מסך הבית של האפליקציה
     private void showWelcomeScreen() {
         //חיבור לXML
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_home);
 
         //חיבור לכפתורים
         Button signUpButton = findViewById(R.id.signUpButton);
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, SignUpActivity.class));
+                startActivity(new Intent(HomeActivity.this, SignUpActivity.class));
             }
         });
 
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         logInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, LogInActivity.class));
+                startActivity(new Intent(HomeActivity.this, LogInActivity.class));
             }
         });
     }

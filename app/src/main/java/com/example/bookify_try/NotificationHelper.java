@@ -14,7 +14,7 @@ public class NotificationHelper {
     private static final String CHANNEL_NAME = "Booking Reminders";
     private static final String CHANNEL_DESC = "Notifications for upcoming bookings";
 
-    /// /
+    /// /מקור עזר מספר 1
     // הפונקציה מקבלת את המסך שבו נמצאים ויוצרת ערוץ שבו יהיה ניתן לשלוח את ההתראות
 
     public static void createNotificationChannel(Context context) {

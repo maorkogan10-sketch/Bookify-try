@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-/// /
+/// /מקור עזר מספר 1
 public class DailyBookingsAdapter extends RecyclerView.Adapter<DailyBookingsAdapter.ViewHolder> {
 
     //יוצר רשימה של אובייקטים מסוג BookingWithUser (מכיל הזמנה ויוזר)

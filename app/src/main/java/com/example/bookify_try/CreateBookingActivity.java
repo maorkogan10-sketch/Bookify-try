@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -19,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import android.widget.ArrayAdapter;
 import androidx.core.content.ContextCompat;
 
 import com.google.firebase.Timestamp;
@@ -60,6 +60,7 @@ public class CreateBookingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //חיבור לאקסמל
         setContentView(R.layout.activity_create_booking);
 
         //חיבור לפיירבייס
@@ -105,7 +106,7 @@ public class CreateBookingActivity extends AppCompatActivity {
         checkNotificationPermission();
     }
 
-    /// /
+    /// /מקור עזר מספר 1
     //הפונקציה לא מקבלת כלום ולא מחזירה כלום היא מבקשת מהמשתמש אישור לשלוח לו התראות
     private void checkNotificationPermission() {
         //בודק אם הגרסה הנוכחית מחייבת לבקש אישור מהמשתמש לשלוח לו התראות
@@ -290,7 +291,7 @@ public class CreateBookingActivity extends AppCompatActivity {
         intent.putExtra("title", "תזכורת להזמנה");
         intent.putExtra("message", "יש לך הזמנה ל-" + booking.getResourceName() + " בעוד שעה. ניפגש! ");
 
-        /// /
+/// /מקור עזר מספר 1
         //אישור למערכת להשתמש באינטנט של הRECIVER אוטומטית
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 this, 

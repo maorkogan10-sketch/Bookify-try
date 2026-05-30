@@ -48,7 +48,7 @@ public class MyBookingsActivity extends AppCompatActivity {
         adapter = new MyBookingsAdapter();
         //מחבר את הריסייקל ויו לאדפטר
         recyclerView.setAdapter(adapter);
-/// /
+/// /מקור מספר 1
         // הפונקציה הפנימית בקלאס של האדפטר שמאזינה עד שמישהו לוחץ על כפתור המחיקה - קורא גם לפונקציה שמקפיצה את הדיאלוג
         adapter.setOnDeleteClickListener(booking -> showDeleteConfirmationDialog(booking));
 /// /
@@ -130,7 +130,6 @@ public class MyBookingsActivity extends AppCompatActivity {
                     }
 
                     //מאזין שמחכה שהמחשב יסיים את כל המשימות - כלומר להביא את כל השמות
-                   /// /
                     Tasks.whenAllSuccess(businessTasks).addOnSuccessListener(objects -> {
                         //יוצר רשימה של האובייקט BookingWithBusiness
                         List<BookingWithBusiness> combinedList = new ArrayList<>();
@@ -142,7 +141,6 @@ public class MyBookingsActivity extends AppCompatActivity {
                             //מוסיף את האובייקט לרשימת האובייקטים
                             combinedList.add(new BookingWithBusiness(bookings.get(i), businessName));
                         }
-                        /// /
                         //שולח לפונקציה של האדפטר את הרשימה כדי שיעלה אותה על המסך
                         adapter.updateData(combinedList);
                     });

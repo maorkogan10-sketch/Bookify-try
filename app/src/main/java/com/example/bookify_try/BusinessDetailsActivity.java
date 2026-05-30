@@ -28,10 +28,13 @@ public class BusinessDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //חיבור לאקסמל
         setContentView(R.layout.activity_business_details);
 
+        //חיבור לפיירבייס
         db = FirebaseFirestore.getInstance();
 
+        //חיבור לרכיבים
         businessNameTextView = findViewById(R.id.businessNameTextView);
         businessAddressTextView = findViewById(R.id.businessAddressTextView);
         businessDescriptionTextView = findViewById(R.id.businessDescriptionTextView);
@@ -52,6 +55,7 @@ public class BusinessDetailsActivity extends AppCompatActivity {
             return;
         }
 
+        //קורה לפונקציה שמעלה את הפרטים של העסק
         loadBusinessDetails();
 
         //מאזין ללוח שנה, קורה כאשר הלקוח לוחץ על תאריך
@@ -69,12 +73,14 @@ public class BusinessDetailsActivity extends AppCompatActivity {
 
     //הפונקציה לא מקבלת כלום ולא מחזירה כלום היא רק מעלה את המסמך של העסק מהפיירבייס ושולחת אותו כאובייקט לפונקציה הבאה
     private void loadBusinessDetails() {
+        //הולך לאוסף העסקים עם הID שהתקבל ומביא צילום מסך של העסק
         db.collection("businesses").document(businessId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         //המרת המסמך של העסק מהפיירבייס לאובייקט
                         Business business = documentSnapshot.toObject(Business.class);
                         if (business != null) {
+                            //קורה לפונקציה שתציג את הפרטים
                             displayBusinessDetails(business);
                         }
                     } else {
@@ -86,6 +92,7 @@ public class BusinessDetailsActivity extends AppCompatActivity {
                 });
     }
 
+    //הפונקציה מקבלת את האובייקט של העסק ומציגה את הפרטים שלו על המסך
     private void displayBusinessDetails(Business business) {
         //משנה את הטקסט בXML לשם העסק לפי האובייקט שקיבל
         businessNameTextView.setText(business.getBusinessName());

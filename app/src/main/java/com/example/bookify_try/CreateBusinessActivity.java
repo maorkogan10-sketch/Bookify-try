@@ -384,7 +384,7 @@ public class CreateBusinessActivity extends AppCompatActivity {
         //מכניסים את השורה למסך
         resourcesContainer.addView(v);
     }
-/// /
+    /// /מקור עזר מספר 1
     //הפונקציה מקבלת יום ונותנת לבעל העסק להזין את הסלוטים בתוך הדיאלוג
     private void showEditHoursDialog(@NonNull final WorkingHours wh) {
         //יוצר רשימה של סלוטים
