@@ -43,6 +43,7 @@ public class DailyBookingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_daily_bookings);
 
+        //חיבור לפיירבייס
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
@@ -98,6 +99,7 @@ public class DailyBookingsActivity extends AppCompatActivity {
         Log.d(TAG, "Loading bookings for businessId: " + businessId + " between " + startOfDay.toDate() + " and " + endOfDay.toDate());
 
         //הולכים לאוסף של ההזמנות לבעל העסק הזה
+        //משתמשים באינדקס
         db.collection("bookings")
                 .whereEqualTo("businessId", businessId)
                 //שמקיימות בין הזמן התחלה לזמן סיום

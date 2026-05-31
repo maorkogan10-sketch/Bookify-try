@@ -92,6 +92,7 @@ public class CreateBusinessActivity extends AppCompatActivity {
 
     //הפונקציה לא מקבלת כלום ובעצם מחברת את המסך לגאבה ויוצרת אותו
     private void setupForBusinessManagement() {
+        //חיבור לXML
         setContentView(R.layout.activity_create_business);
         createBusinessTitle = findViewById(R.id.createBusinessTitle);
         businessNameEditText = findViewById(R.id.businessNameEditText);
@@ -405,7 +406,9 @@ public class CreateBusinessActivity extends AppCompatActivity {
             new TimePickerDialog(this, (v1, h1, m1) -> {
                 //מעלה את השעון סוף
                 new TimePickerDialog(this, (v2, h2, m2) -> {
-                    TimeSlot ts = new TimeSlot(h1, m1, h2, m2); slots.add(ts); addTimeSlotViewToDialog(getLayoutInflater(), container, slots, ts);
+                    TimeSlot ts = new TimeSlot(h1, m1, h2, m2);
+                    slots.add(ts);
+                    addTimeSlotViewToDialog(getLayoutInflater(), container, slots, ts);
                 }, 9, 0, true).show();//ברירת מחדל
             }, 9, 0, true).show();//ברירת מחדל
         });
