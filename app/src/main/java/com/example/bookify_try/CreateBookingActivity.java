@@ -293,9 +293,10 @@ public class CreateBookingActivity extends AppCompatActivity {
 
 /// /מקור עזר מספר 1
         //אישור למערכת להשתמש באינטנט של הRECIVER אוטומטית
+        //האינטנט הרגיל לRECIVER נעטף בPENDING  כדי שנוכל לקשר בינו לבין האלרם מנגר
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
                 this, 
-                booking.getBookingId().hashCode(), 
+                booking.getBookingId().hashCode(), //מזהה יחודי לכל הזמנה, כדי שלא הזמנה חדשה תדרוס את הקודמת
                 intent, 
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         /// /
